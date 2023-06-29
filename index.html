@@ -28,6 +28,21 @@
 
               {{p[1]}}{{p[2] !== undefined ? ':' : ''}}
 
+              <span v-if="p[1] === 'upsample'">
+                coefficient: <input
+                  type="number"
+                  v-model="p[2]"
+                  :step="1"
+                  :min="1"
+                  :max="10">
+
+                <select v-model="p[3]">
+                  <option>nearest</option>
+                  <option>bicubic</option>
+                </select>
+
+              </span>
+
 
               <span v-if="p[1] === 'norm'">
                 <select v-model="p[2]">
@@ -204,6 +219,7 @@
           vTarget: 'd',
           hTarget: 'w',
           pipeline: [
+            [false, 'upsample', 3, 'nearest'],
             [false, 'norm', 'l2'],
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],

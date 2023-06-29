@@ -170,16 +170,19 @@ video.addEventListener("play", () => {
       sess.destroy()
 
       // console.log(lines)
+      
+      let upsampleFactor = 1
+      let upsampleConf = conf.pipeline.filter(c => c[1] === 'upsample')[0]
+      if (upsampleConf) upsampleFactor = upsampleConf[2]
+
       for (let m = 0; m < lines.length; m += 1) {
         // console.log(lines[m])
         context.line.fromParallelCoords(
-          lines[m][1] * 1, lines[m][2] * 1,
+          lines[m][1] / upsampleFactor, lines[m][2] / upsampleFactor,
           t.shape[1], t.shape[0], maxP, maxP / 2,
         );
         // console.log(context.line)
-        if (context.line.angle > 85 && context.line.angle < 95 ) {
-          gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-        }
+        gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
       }
 
       if (state.showpp) {
