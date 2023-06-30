@@ -216,7 +216,7 @@ video.addEventListener("play", () => {
       // }
       // drawCircleOnRegion(roiCanvasArr[i].roiCanvas, 150, 150, 50)
 
-      function drawRectangleOnCanvas(canvas, x, y, width, height) {
+      function drawRectangleOnCanvas(canvas, t, x, y, width, height) {
         // Get the 2D rendering context of the canvas
         var ctx = canvas.getContext('2d');
 
@@ -231,7 +231,7 @@ video.addEventListener("play", () => {
           }
         }
 
-        let detectRatio = pixelOnCount/width*height
+        let detectRatio = pixelOnCount/(width*height)
 
         // for (var i = 0; i < data.length; i += 4) {
         //   data[i] = 255; // red channel
@@ -241,22 +241,36 @@ video.addEventListener("play", () => {
         // }
 
         // Draw a red rectangle on the specified region
-        ctx.strokeStyle = 'green';
-        ctx.lineWidth = 2;
+        if (detectRatio >= t.histOn && !t.state) {
+          t.state = true
+          console.log(t.state)
+          // console.log(detectRatio)
+          // console.log(pixelOnCount, width, height)
+        }
+
+        if (detectRatio < t.histOff && t.state) {
+          t.state = false
+          console.log(t.state)
+          // console.log(detectRatio)
+          // console.log(pixelOnCount, width, height)
+        }
+
+
+        ctx.strokeStyle = t.state ? 'green' : 'red';
+        ctx.lineWidth = 3;
         ctx.strokeRect(x, y, width, height);
 
         // Put the modified pixel data back onto the canvas
         ctx.putImageData(imageData, x, y);
 
-        console.log(detectRatio)
-
       }
-      // drawRectangleOnCanvas(roiCanvasArr[i].roiCanvas, 150, 150, 50, 50)
+
+      conf.trigRects.forEach(t => {
+        drawRectangleOnCanvas(roiCanvasArr[i].roiCanvas, t, ...t.roi)
+      })
 
 
-
-
-      if (state.showpp) {
+      if (conf.showpp) {
         roiCanvasCtx.drawImage(roiCanvasArr[i].roiCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
       }
       

@@ -55,7 +55,7 @@ setRoiCanvasSel(roiCanvas, roiCanvasCtx)
 
 
 document.onkeydown = function(e) {
-  
+  return
   // console.log(e.keyCode)
   switch (e.keyCode) {
     case 65:

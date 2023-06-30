@@ -22,6 +22,11 @@
     ._p-param-wrap {
       display: flex;
     }
+
+    button {
+      margin-left: 10px;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 
@@ -42,6 +47,7 @@
 
 
         <div class="row">
+
           <div v-for="conf in state.confs" class="col-2">
             
             <div>
@@ -73,11 +79,12 @@
                 class="p-param"
                 type="checkbox"
                 name=""
-                v-model="state.showpp"><strong>Show processed</strong>
+                v-model="conf.showpp">
+                <strong>Show processed</strong>
             </div>
             
 
-            <div v-for="(p, i) in conf.pipeline" :class="{'bg-light': i % 2, 'bg-grey': !(i % 2)}">
+            <div v-for="(p, i) in conf.pipeline" class="bd-dark" :class="{'bg-light': i % 2, 'bg-grey': !(i % 2)}">
 
               <div style="padding: 6px;">
                 <div>
@@ -226,12 +233,65 @@
                     :min="1"
                     :max="5">
                 </span>
-
-
-
               </div>
             </div>
+            
+            <!-- trigger rects -->
+            <div v-for="(t, j) in conf.trigRects" :key="j" class="bd-dark" :class="{'bg-light': j % 2, 'bg-grey': !(j % 2)}" style="padding: 6px;">
+              <div><strong>triggerRect</strong></div>
+              <span class="p-param-wrap">              
+                x: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.roi[0]"
+                  :step="1"
+                  :min="1">
+                y: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.roi[1]"
+                  :step="1"
+                  :min="1">
+                w: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.roi[2]"
+                  :step="1"
+                  :min="1">
+                h: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.roi[3]"
+                  :step="1"
+                  :min="1">
+                histOn: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.histOn"
+                  :step="0.1"
+                  :min="0"
+                  :max="1">
+                histOff: <input
+                  class="p-param"
+                  type="number"
+                  v-model="t.histOff"
+                  :step="0.1"
+                  :min="0"
+                  :max="1">
+                <button class="button primary" @click="conf.trigRects.splice(j,1)">remove</button>
+              </span>
+            </div>
+            <span>
+              <button class="button dark" @click="addTrigRect(conf)">add trigRect</button>
+            </span>
           </div>
+          <div class="col-2">
+            <span>
+              <button class="button dark" @click="addConfRegion">add pipeline</button>
+            </span>
+          </div>
+
+
         </div>
       </div>
     </div>
@@ -266,6 +326,22 @@
         }
       },
       methods: {
+        addConfRegion () {
+          // this.state.confs.push(JSON.parse(JSON.stringify(this.confTemplate)))
+          conf = JSON.parse(JSON.stringify(this.confTemplate))
+          conf.region = [10, 10, roiCanvas.width/2-10, 100]
+          console.log(this.state.confs)
+          // console.log('lala')
+        },
+        addTrigRect (conf) {
+          console.log(conf)
+          conf.trigRects.push({
+            roi: [1,1,10,10],
+            histOn: 0.7,
+            histOff: 0.4,
+            state: false
+          })
+        },
         tooglep (e) {
           console.log(e)
           e.stopPropagation()
@@ -289,7 +365,10 @@
             [false, 'erode', 3, 3],
             [false, 'pcLines', 3, 2, 2]
           ],
+          trigRects: []
         }
+
+        this.confTemplate = confTemplate
 
         this.state = {
           roiConfSel: null,
@@ -303,11 +382,13 @@
           Object.assign(this.state, JSON.parse(decodeURI(urlState)))
           this.state.confs.forEach(loadedConf => {
             loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
-              // add if finter don exists on loaded conf
+              // add if filter dony exists on loaded conf
               return loadedConf.pipeline.filter(p => p[1] === pItemTpl[1])[0] || pItemTpl
             })
           })
         }
+
+        this.state.confs.forEach(conf => conf.trigRects ||= [])
 
         this.state.confs[0].region ||= [10, 10, roiCanvas.width/2-10, 100]
         window.state = this.state
