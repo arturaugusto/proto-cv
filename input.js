@@ -55,7 +55,7 @@ setRoiCanvasSel(roiCanvas, roiCanvasCtx)
 
 
 document.onkeydown = function(e) {
-  // return
+  
   // console.log(e.keyCode)
   switch (e.keyCode) {
     case 65:
@@ -72,46 +72,6 @@ document.onkeydown = function(e) {
   // console.log(e.keyCode)
   
   switch (e.keyCode) {
-
-    case 49:
-      state.roiConfSel.format = '8'
-      e.preventDefault();
-      break;
-    case 50:
-      state.roiConfSel.format = '8.8'
-      e.preventDefault();
-      break;
-    case 51:
-      state.roiConfSel.format = '8.8.8'
-      e.preventDefault();
-      break;
-    case 52:
-      state.roiConfSel.format = '8.8.8.8'
-      e.preventDefault();
-      break;
-    case 53:
-      state.roiConfSel.format = '8.8.8.8.8'
-      e.preventDefault();
-      break;
-    case 54:
-      state.roiConfSel.format = '8.8.8.8.8.8'
-      e.preventDefault();
-      break;
-    case 55:
-      state.roiConfSel.format = '8.8.8.8.8.8.8'
-      e.preventDefault();
-      break;
-    case 56:
-      state.roiConfSel.format = '8.8.8.8.8.8.8.8'
-      e.preventDefault();
-      break;
-    case 57:
-      state.roiConfSel.format = '8.8.8.8.8.8.8.8.8'
-      e.preventDefault();
-      break;
-
-
-
     
     case 84:
       state.showpp = !state.showpp
@@ -119,18 +79,6 @@ document.onkeydown = function(e) {
       break;
 
     case 37:
-      // console.log('left');
-      if (e.ctrlKey) {
-        state.roiConfSel.gap = Math.max(state.roiConfSel.gap-1, 0)
-        e.preventDefault();
-        break;
-      }
-
-      if (e.shiftKey) {
-        state.roiConfSel.skew = Math.max(state.roiConfSel.skew-0.5, -30)
-        e.preventDefault();
-        break;
-      }
 
       if (state.roiConfSel.hTarget) {
         state.roiConfSel.hTarget = null
@@ -157,12 +105,6 @@ document.onkeydown = function(e) {
     case 38:
       // console.log('up');
 
-      if (e.shiftKey) {
-        state.roiConfSel.gamma = Math.min(state.roiConfSel.gamma+0.2, 6)
-        e.preventDefault();
-        break;
-      }
-
       if (state.roiConfSel.vTarget) {
         state.roiConfSel.vTarget = null
         state.roiConfSel.hTarget = 'w'
@@ -186,18 +128,6 @@ document.onkeydown = function(e) {
       break;
     case 39:
       // console.log('right');
-
-      if (e.ctrlKey) {
-        state.roiConfSel.gap = Math.min(state.roiConfSel.gap+1, 100)
-        e.preventDefault();
-        break;
-      }
-
-      if (e.shiftKey) {
-        state.roiConfSel.skew = Math.min(state.roiConfSel.skew+0.5, 30)
-        e.preventDefault();
-        break;
-      }
 
       if (state.roiConfSel.hTarget) {
       state.roiConfSel.hTarget = null
@@ -224,12 +154,6 @@ document.onkeydown = function(e) {
       break;
     case 40:
       // console.log('down');
-      if (e.shiftKey) {
-        state.roiConfSel.gamma = Math.max(state.roiConfSel.gamma-0.2, 0.02)
-        e.preventDefault();
-        break;
-      }
-
       if (state.roiConfSel.vTarget) {
         state.roiConfSel.vTarget = null
         state.roiConfSel.hTarget = 's'

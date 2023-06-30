@@ -90,7 +90,6 @@ video.addEventListener("play", () => {
       let canvasProcessed
       
       let lines = [];
-      const maxP = Math.max(t.shape[0], t.shape[1]);
 
       conf.pipeline.forEach(c => {
         if (c[0]) {
@@ -164,6 +163,7 @@ video.addEventListener("play", () => {
       }
 
 
+      const maxP = Math.max(t.shape[0], t.shape[1]);
 
       gmContextCount += 1;
       sess.destroy()
@@ -171,13 +171,15 @@ video.addEventListener("play", () => {
       // console.log(lines)
       
       let upsampleFactor = 1
-      let upsampleConf = conf.pipeline.filter(c => c[1] === 'upsample')[0]
+      let upsampleConf = conf.pipeline.filter(c => c[0] && c[1] === 'upsample')[0]
       if (upsampleConf) upsampleFactor = upsampleConf[2]
 
+      // console.log(upsampleFactor)
+      // TODO: not working with pclines+upsample
       for (let m = 0; m < lines.length; m += 1) {
-        // console.log(lines[m])
         context.line.fromParallelCoords(
-          lines[m][1] / upsampleFactor, lines[m][2] / upsampleFactor,
+          lines[m][1] / upsampleFactor,
+          lines[m][2] / upsampleFactor,
           t.shape[1], t.shape[0], maxP, maxP / 2,
         );
         // console.log(context.line)
@@ -222,26 +224,34 @@ video.addEventListener("play", () => {
         var imageData = ctx.getImageData(x, y, width, height);
         var data = imageData.data;
 
-        
-
-        // Loop through the pixel data and modify the values
+        let pixelOnCount = 0
         for (var i = 0; i < data.length; i += 4) {
-          // Set the red channel value to 255 (full intensity)
-          data[i] = 255; // red channel
-          data[i + 1] = 0; // green channel
-          data[i + 2] = 0; // blue channel
-          // The alpha channel (data[i + 3]) remains unchanged
+          if (data[i] || data[i + 1] || data[i + 2]) {
+            pixelOnCount += 1
+          }
         }
+
+        let detectRatio = pixelOnCount/width*height
+
+        // for (var i = 0; i < data.length; i += 4) {
+        //   data[i] = 255; // red channel
+        //   // data[i + 1] = 0; // green channel
+        //   // data[i + 2] = 0; // blue channel
+        //   data[i + 3] = 100; // alpha channel
+        // }
+
+        // Draw a red rectangle on the specified region
+        ctx.strokeStyle = 'green';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
 
         // Put the modified pixel data back onto the canvas
         ctx.putImageData(imageData, x, y);
 
-        // Draw a red rectangle on the specified region
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(x, y, width, height);
+        console.log(detectRatio)
+
       }
-      drawRectangleOnCanvas(roiCanvasArr[i].roiCanvas, 150, 150, 50, 50)
+      // drawRectangleOnCanvas(roiCanvasArr[i].roiCanvas, 150, 150, 50, 50)
 
 
 

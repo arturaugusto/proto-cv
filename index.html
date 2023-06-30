@@ -43,7 +43,42 @@
 
         <div class="row">
           <div v-for="conf in state.confs" class="col-2">
+            
+            <div>
+              <span class="is-vertical-align"><span style="width: 22px;">x:</span><input
+                  class="p-param"
+                  type="number"
+                  name=""
+                  v-model="conf.region[0]"></span>
+              <span class="is-vertical-align"><span style="width: 22px;">y:</span><input
+                  class="p-param"
+                  type="number"
+                  name=""
+                  v-model="conf.region[1]"></span>
+              <span class="is-vertical-align"><span style="width: 22px;">w:</span><input
+                  class="p-param"
+                  type="number"
+                  name=""
+                  v-model="conf.region[2]"></span>
+              <span class="is-vertical-align"><span style="width: 22px;">h:</span><input
+                  class="p-param"
+                  type="number"
+                  name=""
+                  v-model="conf.region[3]"></span>
+            </div>
+            
+
+            <div>
+              <input
+                class="p-param"
+                type="checkbox"
+                name=""
+                v-model="state.showpp"><strong>Show processed</strong>
+            </div>
+            
+
             <div v-for="(p, i) in conf.pipeline" :class="{'bg-light': i % 2, 'bg-grey': !(i % 2)}">
+
               <div style="padding: 6px;">
                 <div>
                   <input
