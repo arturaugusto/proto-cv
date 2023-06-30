@@ -1,5 +1,4 @@
 const video = document.getElementById('video');
-const button = document.getElementById('button');
 const select = document.getElementById('select');
 
 const videoCanvas = document.getElementById('videoCanvas');
@@ -185,10 +184,70 @@ video.addEventListener("play", () => {
         gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
       }
 
+
+
+      // function drawCircleOnRegion(canvas, x, y, radius) {
+      //   var ctx = canvas.getContext("2d");
+      //   var imageData = ctx.getImageData(x, y, radius * 2, radius * 2);
+      //   var data = imageData.data;
+
+      //   var centerX = radius;
+      //   var centerY = radius;
+
+      //   for (var i = 0; i < radius * 2; i++) {
+      //     for (var j = 0; j < radius * 2; j++) {
+      //       var dx = i - centerX;
+      //       var dy = j - centerY;
+      //       var distance = Math.sqrt(dx * dx + dy * dy);
+
+      //       if (distance <= radius) {
+      //         var pixelIndex = (j * radius * 2 + i) * 4;
+      //         data[pixelIndex] = 255;     // Red channel
+      //         data[pixelIndex + 1] = 0;   // Green channel
+      //         data[pixelIndex + 2] = 0;   // Blue channel
+      //         data[pixelIndex + 3] = 255; // Alpha channel (255 for opaque)
+      //       }
+      //     }
+      //   }
+
+      //   ctx.putImageData(imageData, x, y);
+      // }
+      // drawCircleOnRegion(roiCanvasArr[i].roiCanvas, 150, 150, 50)
+
+      function drawRectangleOnCanvas(canvas, x, y, width, height) {
+        // Get the 2D rendering context of the canvas
+        var ctx = canvas.getContext('2d');
+
+        // Get the pixel data from the rectangular region
+        var imageData = ctx.getImageData(x, y, width, height);
+        var data = imageData.data;
+
+        
+
+        // Loop through the pixel data and modify the values
+        for (var i = 0; i < data.length; i += 4) {
+          // Set the red channel value to 255 (full intensity)
+          data[i] = 255; // red channel
+          data[i + 1] = 0; // green channel
+          data[i + 2] = 0; // blue channel
+          // The alpha channel (data[i + 3]) remains unchanged
+        }
+
+        // Put the modified pixel data back onto the canvas
+        ctx.putImageData(imageData, x, y);
+
+        // Draw a red rectangle on the specified region
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(x, y, width, height);
+      }
+      drawRectangleOnCanvas(roiCanvasArr[i].roiCanvas, 150, 150, 50, 50)
+
+
+
+
       if (state.showpp) {
         roiCanvasCtx.drawImage(roiCanvasArr[i].roiCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
-
-
       }
       
       roiCanvasCtx.drawImage(roiCanvasArr[i].maskCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
@@ -221,7 +280,7 @@ function gotDevices(mediaDevices) {
 
 }
 
-button.addEventListener('click', event => {
+select.addEventListener('change', event => {
   if (typeof currentStream !== 'undefined') {
     stopMediaTracks(currentStream);
   }
@@ -236,16 +295,16 @@ button.addEventListener('click', event => {
     audio: false
   };
   navigator.mediaDevices
-    .getUserMedia(constraints)
-    .then(stream => {
-      currentStream = stream;
-      video.srcObject = stream;
-      return navigator.mediaDevices.enumerateDevices();
-    })
-    .then(gotDevices)
-    .catch(error => {
-      console.error(error);
-    });
+  .getUserMedia(constraints)
+  .then(stream => {
+    currentStream = stream;
+    video.srcObject = stream;
+    return navigator.mediaDevices.enumerateDevices();
+  })
+  .then(gotDevices)
+  .catch(error => {
+    console.error(error);
+  });
 });
 
 
