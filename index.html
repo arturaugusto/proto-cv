@@ -30,11 +30,12 @@
       
       <div class="row is-marginless">
         <div class="col-4">
-          Camera: <select id="select">
+          Camera: <select id="select" @change="pg">
             <option></option>
           </select><div class="text-dark"><small>tip: you can drag the stream window</small></div>
         </div>
-        <div class="col-8">
+        <div class="col-7">
+          <!-- arturaugusto@gmail.com -->
         </div>
       </div>
 
@@ -45,38 +46,43 @@
 
 
         <div class="row is-marginless">
-          <div v-for="(conf, conf_i) in state.confs" class="col-2 is-marginless">
+          <div v-for="(conf, conf_i) in state.confs" class="col-2 is-marginless" style="padding-top: 6px;">
             
 
             <div :style="{'background-color': colors[conf_i]}">
 
-              <span class="is-vertical-align"><span style="width: 22px;">x:</span><input
+              <span class="is-vertical-align"><span style="width: 26px;">&nbsp;x:</span><input
+                @change="pg"
                   class="p-param"
                   type="number"
                   name=""
                   v-model="conf.region[0]"></span>
-              <span class="is-vertical-align"><span style="width: 22px;">y:</span><input
+              <span class="is-vertical-align"><span style="width: 26px;">&nbsp;y:</span><input
+                @change="pg"
                   class="p-param"
                   type="number"
                   name=""
                   v-model="conf.region[1]"></span>
-              <span class="is-vertical-align"><span style="width: 22px;">w:</span><input
+              <span class="is-vertical-align"><span style="width: 26px;">&nbsp;w:</span><input
+                @change="pg"
                   class="p-param"
                   type="number"
                   name=""
                   v-model="conf.region[2]"></span>
-              <span class="is-vertical-align"><span style="width: 22px;">h:</span><input
+              <span class="is-vertical-align"><span style="width: 26px;">&nbsp;h:</span><input
+                @change="pg"
                   class="p-param"
                   type="number"
                   name=""
                   v-model="conf.region[3]"></span>
               <div>
                 <input
+                  @change="pg"
                   class="p-param"
                   type="checkbox"
                   name=""
                   v-model="conf.showpp">
-                  <strong>Show processed</strong>
+                  <strong>Show result</strong>
               </div>
 
               <button class="button error" @click="state.confs.splice(conf_i,1)">remove</button>
@@ -91,6 +97,7 @@
               <div style="padding: 6px;">
                 <div>
                   <input
+                    @change="pg"
                     class="p-param"
                     type="checkbox"
                     name=""
@@ -99,6 +106,7 @@
 
                 <span v-if="p[1] === 'upsample'" class="p-param-wrap">
                   coefficient: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -106,7 +114,7 @@
                     :min="1"
                     :max="10">
 
-                  <select v-model="p[3]" class="p-param">
+                  <select v-model="p[3]" class="p-param" @change="pg">
                     <option>nearest</option>
                     <option>bicubic</option>
                   </select>
@@ -115,7 +123,7 @@
 
 
                 <span v-if="p[1] === 'norm'" class="p-param-wrap">
-                  <select v-model="p[2]" class="p-param">
+                  <select v-model="p[2]" class="p-param" @change="pg">
                     <option>l2</option>
                     <option>minmax</option>
                   </select>
@@ -124,6 +132,7 @@
 
                 <span v-if="p[1] === 'gaussianBlur'" class="p-param-wrap">
                   H: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -131,6 +140,7 @@
                     :min="3"
                     :max="8">
                   H: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[3]"
@@ -141,6 +151,7 @@
 
                 <span v-if="p[1] === 'colorSegmentation'" class="p-param-wrap">
                   Clusters: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -151,6 +162,7 @@
 
                 <span v-if="p[1] === 'adaptiveThreshold'" class="p-param-wrap">
                   Size: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -158,6 +170,7 @@
                     :min="0"
                     :max="100">
                   Value: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[3]"
@@ -168,6 +181,7 @@
 
                 <span v-if="p[1] === 'cannyEdges'" class="p-param-wrap">
                   High Threshold: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -175,6 +189,7 @@
                     :min="0"
                     :max="1">
                   Low Threshold: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[3]"
@@ -185,6 +200,7 @@
 
                 <span v-if="p[1] === 'dilate'" class="p-param-wrap">
                   W: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -192,6 +208,7 @@
                     :min="1"
                     :max="40">
                   H: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[3]"
@@ -202,6 +219,7 @@
 
                 <span v-if="p[1] === 'erode'" class="p-param-wrap">
                   W: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
@@ -209,6 +227,7 @@
                     :min="1"
                     :max="40">
                   H: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[3]"
@@ -221,6 +240,7 @@
 
                 <span v-if="p[1] === 'pcLines'" class="p-param-wrap">
                   N lines: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[5]"
@@ -228,12 +248,29 @@
                     :min="1"
                     :max="50">
                   Layers: <input
+                    @change="pg"
                     class="p-param"
                     type="number"
                     v-model="p[2]"
                     :step="1"
                     :min="1"
-                    :max="5">
+                    :max="4">
+<!--                   dStep: <input
+    @change="pg"
+                    class="p-param"
+                    type="number"
+                    v-model="p[3]"
+                    :step="1"
+                    :min="1"
+                    :max="4">
+                  dCoeficient: <input
+                    @change="pg"
+                    class="p-param"
+                    type="number"
+                    v-model="p[4]"
+                    :step="1"
+                    :min="1"
+                    :max="4"> -->
                 </span>
               </div>
             </div>
@@ -243,30 +280,35 @@
               <div><strong>triggerRect</strong></div>
               <span class="p-param-wrap">              
                 x: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.roi[0]"
                   :step="1"
                   :min="1">
                 y: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.roi[1]"
                   :step="1"
                   :min="1">
                 w: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.roi[2]"
                   :step="1"
                   :min="1">
                 h: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.roi[3]"
                   :step="1"
                   :min="1">
                 histOn: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.histOn"
@@ -274,6 +316,7 @@
                   :min="0"
                   :max="1">
                 histOff: <input
+                  @change="pg"
                   class="p-param"
                   type="number"
                   v-model="t.histOff"
@@ -287,7 +330,7 @@
               <button class="button success" @click="addTrigRect(conf)">add trigRect</button>
             </span>
           </div>
-          <div class="col-2">
+          <div class="col-2" style="padding-top: 6px;">
             <span>
               <button v-if="state && state.confs && state.confs.length < 6" class="button success" @click="addConfRegion">add pipeline</button>
             </span>
@@ -299,10 +342,11 @@
       </div>
     </div>
 
-    <div class="row" style="padding-top: 20px;">
+    <div class="row is-marginless" style="padding-top: 20px;">
       <div class="col-12">
         <div>postprocessing code:</div>
         <div id="code"></div>
+        <textarea style="width: 90vw;height: 40vh;margin-top: 6px;"></textarea>
       </div>
     </div>
 
@@ -346,12 +390,39 @@
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 
     createApp({
+      watch : {
+        'state.code' (val) {
+          this.pg()
+        }
+      },
       data() {
         return {
+          stateChangeDebounce: undefined,
           state: {},
         }
       },
       methods: {
+        pg () {
+          window.clearTimeout(this.stateChangeDebounce)
+          this.stateChangeDebounce = window.setTimeout(() => {
+            let stateClone = JSON.parse(JSON.stringify(this.state))
+            stateClone.code = this.myCodeMirror.getValue()
+            
+            // clear state data
+            stateClone.confs.forEach(conf => {
+              delete conf.lines
+              if (conf.trigRects) {
+                conf.trigRects.forEach(trigRect => {
+                  delete trigRect.state
+                })
+              }
+            })
+
+            let permalinkText = window.location.origin + window.location.pathname + '#/' + JSON.stringify(stateClone)
+            history.pushState(null, "", permalinkText)
+            console.log('permalinkDone')
+          }, 500)
+        },
         addConfRegion () {
           let conf = JSON.parse(JSON.stringify(this.confTemplate))
           conf.region = [10, 10, roiCanvas.width/2-10, 100]
@@ -361,8 +432,8 @@
         addTrigRect (conf) {
           conf.trigRects.push({
             roi: [10,10,10,10],
-            histOn: 0.7,
-            histOff: 0.4,
+            histOn: 0.07,
+            histOff: 0.04,
             state: false
           })
         },
@@ -384,9 +455,12 @@
             [false, 'adaptiveThreshold', 5, 15],
             [false, 'sobelOperator'],
             [false, 'cannyEdges', 0.25, 0.85],
+            [false, 'invert'],
             [false, 'dilate', 3, 3],
             [false, 'erode', 3, 3],
-            [false, 'pcLines', 3, 2, 2]
+            [false, 'dilate_2', 3, 3],
+            [false, 'invert_2'],
+            [false, 'pcLines', 2, 2, 2, 2]
           ],
           trigRects: []
         }
@@ -405,10 +479,29 @@
           this.state.confs.forEach(loadedConf => {
             loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
               // add if filter dony exists on loaded conf
-              return loadedConf.pipeline.filter(p => p[1] === pItemTpl[1])[0] || pItemTpl
+              return loadedConf.pipeline.filter(p => p[1] === pItemTpl[1])[0] || JSON.parse(JSON.stringify(pItemTpl))
             })
           })
         }
+
+        this.myCodeMirror = CodeMirror(document.getElementById('code'), {
+          value: this.state.code || 'console.log(data)\n',
+          lineNumbers: true,
+          // firstLineNumber: 10,
+          mode: 'javascript',
+          theme: 'monokai',
+          // height: 'auto', 
+          // viewportMargin: 'Infinity'
+        });
+
+        this.myCodeMirror.on('change', () => {
+          this.state.code = this.myCodeMirror.getValue()
+        })
+
+
+        this.myCodeMirror.setSize('90vw', '70vh')
+        window.myCodeMirror = this.myCodeMirror
+
 
         this.state.confs.forEach(conf => conf.trigRects ||= [])
 

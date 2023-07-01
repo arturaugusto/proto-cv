@@ -22,14 +22,14 @@ video {
 .wrapper canvas {
 /*  position: absolute;*/
   position: fixed;
-/*  display: block;
-  left: 50%;
-  transform: translate(-50%, -50%);*/
+  display: block;
+/*  left: 50%;*/
+  transform: translate(30%, -50%);
   max-height: 480px;
 }
 
 .video-wrapper {
-  top: 350px;
+  top: 400px;
   
 }
 

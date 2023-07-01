@@ -33,15 +33,6 @@ function stopMediaTracks(stream) {
   });
 };
 
-var myCodeMirror = CodeMirror(document.getElementById('code'), {
-  value: "console.log(1);\n",
-  mode:  "javascript",
-  theme: 'monokai',
-});
-
-myCodeMirror.setSize('90vw', '200px')
-console.log(myCodeMirror)
-
 
 function playTone(frequency, duration) {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -75,6 +66,8 @@ let gmContextCount = 0
 
 const context = { line: new gm.Line() }
 
+let POSTPROCESS_STATE = {}
+
 video.addEventListener("play", () => {
   videoCanvas.width = video.videoWidth;
   videoCanvas.height = video.videoHeight;
@@ -86,8 +79,8 @@ video.addEventListener("play", () => {
   const draw = () => {    
     roiCanvasCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height)
     
-    
     state.confs.forEach((conf, i) => {
+      let upsampleConf = conf.pipeline.filter(c => c[0] && c[1].split('_')[0] === 'upsample')[0]
       // Crop desired region from first canvas
       var imageData1 = videoCanvasCtx.getImageData(...conf.region);
       // roiCanvasCtx.fillRect(...conf.region);
@@ -108,9 +101,7 @@ video.addEventListener("play", () => {
 
       if (conf.pipeline.filter(p => p[0]).length) {
         let uint8array = Uint8Array.from(imageData1.data)
-
         const sess = new gm.Session();
-        
         const t = new gm.Tensor('uint8', [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], uint8array);
         
         let pipeline = t
@@ -121,13 +112,21 @@ video.addEventListener("play", () => {
         let canvasProcessed
         
         let lines = [];
-
+        
         conf.pipeline.forEach(c => {
           if (c[0]) {
-            if (c[1] === 'dilate' || c[1] === 'erode') {
-              pipeline = gm[c[1]](pipeline, [...c.slice(2)])
+            let opName = c[1].split('_')[0]
+
+            if (opName === 'invert') {
+              let factor = upsampleConf ? upsampleConf[2] : 1
+              let whiteTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height*factor, roiCanvasArr[i].roiCanvas.width*factor, 4])
+
+              whiteTensor.data.fill(255)
+              pipeline = gm.sub(whiteTensor, pipeline)
+            } else if (opName === 'dilate' || opName === 'erode') {
+              pipeline = gm[opName](pipeline, [...c.slice(2)])
             } else {
-              if (c[1] === 'pcLines') {
+              if (opName === 'pcLines') {
                 // allocate output tensor
                 output = gm.tensorFrom(pipeline);
                 sess.init(pipeline);
@@ -143,7 +142,8 @@ video.addEventListener("play", () => {
                 roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0);
 
 
-                pipeline = gm[c[1]](pipeline, ...c.slice(2))
+                // https://github.com/PeculiarVentures/GammaCV/blob/master/app/sources/examples/pc_lines.js
+                pipeline = gm[opName](pipeline, ...c.slice(2))
 
                 
                 output = gm.tensorFrom(pipeline);
@@ -165,13 +165,11 @@ video.addEventListener("play", () => {
                 }
 
                 lines = lines.sort((b, a) => a[0] - b[0]);
-                // console.log(lines)
-                let nLines = conf.pipeline.filter(c => c[1] === 'pcLines')[0][5]
-                // console.log(nLines)
+                let nLines = c[5]
                 lines = lines.slice(0, nLines);
-
+                conf.lines = lines
               } else {
-                pipeline = gm[c[1]](pipeline, ...c.slice(2))
+                pipeline = gm[opName](pipeline, ...c.slice(2))
               }
             }
           }
@@ -202,7 +200,6 @@ video.addEventListener("play", () => {
         // console.log(lines)
         
         let upsampleFactor = 1
-        let upsampleConf = conf.pipeline.filter(c => c[0] && c[1] === 'upsample')[0]
         if (upsampleConf) upsampleFactor = upsampleConf[2]
 
         // console.log(upsampleFactor)
@@ -215,7 +212,7 @@ video.addEventListener("play", () => {
           );
           // console.log(context.line)
           gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-          conf.lines = lines
+          // conf.lines = lines
         }
       }
 
@@ -283,7 +280,6 @@ video.addEventListener("play", () => {
 
         if (detectRatio < t.histOff && t.state) {
           t.state = false
-          console.log(t.state)
           // console.log(detectRatio)
           // console.log(pixelOnCount, width, height)
         }
@@ -313,11 +309,11 @@ video.addEventListener("play", () => {
 
     
     try {
-      let postProcFun = new Function('data', myCodeMirror.getValue());
-      postProcFun(state.confs)
+      let postProcFun = new Function('pipelines', 'state', myCodeMirror.getValue());
+      postProcFun(state.confs, POSTPROCESS_STATE)
     } 
     catch (ex) {
-      console.error("outer", ex.message)
+      console.error("Error execution postprocessing:", ex.message)
     }
 
     requestAnimationFrame(draw);

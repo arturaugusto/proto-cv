@@ -100,11 +100,3 @@ function makeElementDraggable(element) {
 
 makeElementDraggable(document.getElementById('roiCanvas'))
 
-
-document.onkeyup = function(e) {
-  if (window.state) {
-    let permalinkInputElement = document.getElementById('permalinkInput')
-    let permalinkText = window.location.origin + window.location.pathname + '#/' + JSON.stringify(state)
-    history.pushState(null, "", permalinkText)
-  }
-}
