@@ -6,51 +6,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Proto-CV</title>
-  <link rel="stylesheet" href="./app.css" />
   <link rel="stylesheet" href="./chota.min.css" />
+  <link rel="stylesheet" href="./app.css" />
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/mode/javascript/javascript.min.js"></script>
+  
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/monokai.min.css" rel="stylesheet">
 
 
-  <style>
-    input, select {
-      border-radius: 0px !important;
-    }
 
-    .p-param {
-/*      width: 100px !important;*/
-    }
-
-    ._p-param-wrap {
-      display: flex;
-    }
-
-    button {
-      margin-left: 10px;
-      margin-bottom: 5px;
-    }
-  </style>
 </head>
 
 <body>
+  <script type="text/javascript">
+    document.body.classList.add('dark')
+    var COLORS = ['#3D0843', '#590A26', '#335C0A', '#57630B', '#0C2842', '#66400C']
+  </script>
+
   <main>
     <div class="controls">
       
-      <div class="row">
-        <div class="col">
-          Camera: <select id="select" style="width: 300px;display: inline-block;">
+      <div class="row is-marginless">
+        <div class="col-4">
+          Camera: <select id="select">
             <option></option>
-          </select>
+          </select><div class="text-dark"><small>tip: you can drag the stream window</small></div>
+        </div>
+        <div class="col-8">
         </div>
       </div>
+
+
 
       <div id="app">
         <!-- <pre>{{ state }}</pre> -->
 
 
-        <div class="row">
-
-          <div v-for="conf in state.confs" class="col-2" @click="focusCol($event)">
+        <div class="row is-marginless">
+          <div v-for="(conf, conf_i) in state.confs" class="col-2 is-marginless">
             
-            <div>
+
+            <div :style="{'background-color': colors[conf_i]}">
+
               <span class="is-vertical-align"><span style="width: 22px;">x:</span><input
                   class="p-param"
                   type="number"
@@ -71,20 +70,23 @@
                   type="number"
                   name=""
                   v-model="conf.region[3]"></span>
+              <div>
+                <input
+                  class="p-param"
+                  type="checkbox"
+                  name=""
+                  v-model="conf.showpp">
+                  <strong>Show processed</strong>
+              </div>
+
+              <button class="button error" @click="state.confs.splice(conf_i,1)">remove</button>
+
             </div>
             
 
-            <div>
-              <input
-                class="p-param"
-                type="checkbox"
-                name=""
-                v-model="conf.showpp">
-                <strong>Show processed</strong>
-            </div>
             
 
-            <div v-for="(p, i) in conf.pipeline" class="bd-dark" :class="{'bg-light': i % 2, 'bg-grey': !(i % 2)}">
+            <div v-for="(p, i) in conf.pipeline" class="bd-dark" :class="{'bg-darksteel': i % 2, 'bg-darksteel2': !(i % 2)}">
 
               <div style="padding: 6px;">
                 <div>
@@ -237,7 +239,7 @@
             </div>
             
             <!-- trigger rects -->
-            <div v-for="(t, j) in conf.trigRects" :key="j" class="bd-dark" :class="{'bg-light': j % 2, 'bg-grey': !(j % 2)}" style="padding: 6px;">
+            <div v-for="(t, j) in conf.trigRects" :key="j" class="bd-dark" :class="{'bg-success': t.state, '_bg-grey': !t.state}" style="padding: 6px;">
               <div><strong>triggerRect</strong></div>
               <span class="p-param-wrap">              
                 x: <input
@@ -278,47 +280,60 @@
                   :step="0.1"
                   :min="0"
                   :max="1">
-                <button class="button primary" @click="conf.trigRects.splice(j,1)">remove</button>
               </span>
+              <button class="button error" @click="conf.trigRects.splice(j,1)">remove</button>
             </div>
             <span>
-              <button class="button dark" @click="addTrigRect(conf)">add trigRect</button>
+              <button class="button success" @click="addTrigRect(conf)">add trigRect</button>
             </span>
           </div>
           <div class="col-2">
             <span>
-              <button v-if="state && state.confs && state.confs.length < 6" class="button dark" @click="addConfRegion">add pipeline</button>
+              <button v-if="state && state.confs && state.confs.length < 6" class="button success" @click="addConfRegion">add pipeline</button>
             </span>
           </div>
+
 
 
         </div>
       </div>
     </div>
 
-    <video id="video" autoplay playsinline></video>
-    <div class="wrapper video-wrapper" id="videoWrapper">
-      <canvas id="videoCanvas"></canvas>
-      <canvas id="roiCanvas"></canvas>
+    <div class="row" style="padding-top: 20px;">
+      <div class="col-12">
+        <div>postprocessing code:</div>
+        <div id="code"></div>
+      </div>
     </div>
+
+
+
+    <div>    
+      <video id="video" autoplay playsinline></video>
+      <div class="wrapper video-wrapper" id="videoWrapper">
+        <canvas id="videoCanvas"></canvas>
+        <canvas id="roiCanvas"></canvas>
+      </div>
+      <canvas id="roi1Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask1Canvas" style="visibility: collapse;"></canvas>
+
+      <canvas id="roi2Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask2Canvas" style="visibility: collapse;"></canvas>
+
+      <canvas id="roi3Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask3Canvas" style="visibility: collapse;"></canvas>
+
+      <canvas id="roi4Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask4Canvas" style="visibility: collapse;"></canvas>
+
+      <canvas id="roi5Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask5Canvas" style="visibility: collapse;"></canvas>
+
+      <canvas id="roi6Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="mask6Canvas" style="visibility: collapse;"></canvas>
+    </div>
+
     
-    <canvas id="roi1Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask1Canvas" style="visibility: collapse;"></canvas>
-
-    <canvas id="roi2Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask2Canvas" style="visibility: collapse;"></canvas>
-
-    <canvas id="roi3Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask3Canvas" style="visibility: collapse;"></canvas>
-
-    <canvas id="roi4Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask4Canvas" style="visibility: collapse;"></canvas>
-
-    <canvas id="roi5Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask5Canvas" style="visibility: collapse;"></canvas>
-
-    <canvas id="roi6Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="mask6Canvas" style="visibility: collapse;"></canvas>
 
 
 
@@ -337,14 +352,6 @@
         }
       },
       methods: {
-        focusCol (e) {
-          let roiCanvas = document.getElementById('roiCanvas')
-          let targetBc = e.target.getBoundingClientRect()
-          roiCanvas.parentElement.style.left = targetBc .x+targetBc.width + 'px'
-
-          
-          // console.log(e, roiCanvas)
-        },
         addConfRegion () {
           let conf = JSON.parse(JSON.stringify(this.confTemplate))
           conf.region = [10, 10, roiCanvas.width/2-10, 100]
@@ -352,9 +359,8 @@
           // console.log('lala')
         },
         addTrigRect (conf) {
-          console.log(conf)
           conf.trigRects.push({
-            roi: [1,1,10,10],
+            roi: [10,10,10,10],
             histOn: 0.7,
             histOff: 0.4,
             state: false
@@ -366,10 +372,9 @@
         }
       },
       mounted () {
+        this.colors = window.COLORS
         let confTemplate = {
-          region: null,
-          vTarget: 'd',
-          hTarget: 'w',
+          region: [10,10,100,100],
           pipeline: [
             [false, 'upsample', 3, 'nearest'],
             [false, 'norm', 'l2'],
@@ -389,7 +394,6 @@
         this.confTemplate = confTemplate
 
         this.state = {
-          roiConfSel: null,
           confs: [
             Object.assign({}, confTemplate),
           ]
@@ -416,8 +420,6 @@
 
   <script src="./app.js"></script>
   <script src="./input.js"></script>
-  <script src="./preprocess.js"></script>
-
 </body>
 
 </html>

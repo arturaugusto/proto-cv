@@ -33,6 +33,44 @@ function stopMediaTracks(stream) {
   });
 };
 
+var myCodeMirror = CodeMirror(document.getElementById('code'), {
+  value: "console.log(1);\n",
+  mode:  "javascript",
+  theme: 'monokai',
+});
+
+myCodeMirror.setSize('90vw', '200px')
+console.log(myCodeMirror)
+
+
+function playTone(frequency, duration) {
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  const oscillator = audioContext.createOscillator();
+  oscillator.frequency.value = frequency;
+
+  const gainNode = audioContext.createGain();
+  gainNode.gain.value = 0.5;
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+
+  oscillator.start();
+
+  // Calculate the fade-out duration (20% of the total duration)
+  const fadeOutDuration = duration * 0.05;
+
+  // Schedule the fade-out effect
+  gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + (duration / 1000) - (fadeOutDuration / 1000));
+
+  // Stop the oscillator after the specified duration
+  setTimeout(function() {
+    oscillator.stop();
+    audioContext.close();
+  }, duration);
+}
+
+
+
 let gmContextCount = 0
 
 const context = { line: new gm.Line() }
@@ -44,25 +82,21 @@ video.addEventListener("play", () => {
   roiCanvas.width = video.videoWidth;
   roiCanvas.height = video.videoHeight;
 
-  state.roiConfSel = state.confs[0]
-
 
   const draw = () => {    
     roiCanvasCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height)
     
     
     state.confs.forEach((conf, i) => {
-      
-      if (i === 0) {
-        roiCanvasCtx.fillStyle = "rgba(255, 0, 0, 0.3)";
-      } else {
-        roiCanvasCtx.fillStyle = "rgba(0, 0, 255, 0.3)";
-      }
-
       // Crop desired region from first canvas
       var imageData1 = videoCanvasCtx.getImageData(...conf.region);
+      // roiCanvasCtx.fillRect(...conf.region);
+      roiCanvasCtx.strokeStyle = COLORS[i]
+      roiCanvasCtx.lineWidth = 2
+      roiCanvasCtx.strokeRect(conf.region[0]-1, conf.region[1]-1, conf.region[2]+2, conf.region[3]+2)
 
-      roiCanvasCtx.fillRect(...conf.region);
+
+
       videoCanvasCtx.drawImage(video, 0, 0, videoCanvas.width, videoCanvas.height);
 
       roiCanvasArr[i].roiCanvasCtx.putImageData(imageData1, 0, 0);
@@ -181,6 +215,7 @@ video.addEventListener("play", () => {
           );
           // console.log(context.line)
           gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
+          conf.lines = lines
         }
       }
 
@@ -242,7 +277,6 @@ video.addEventListener("play", () => {
         // Draw a red rectangle on the specified region
         if (detectRatio >= t.histOn && !t.state) {
           t.state = true
-          console.log(t.state)
           // console.log(detectRatio)
           // console.log(pixelOnCount, width, height)
         }
@@ -276,6 +310,15 @@ video.addEventListener("play", () => {
       roiCanvasCtx.drawImage(roiCanvasArr[i].maskCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
 
     })
+
+    
+    try {
+      let postProcFun = new Function('data', myCodeMirror.getValue());
+      postProcFun(state.confs)
+    } 
+    catch (ex) {
+      console.error("outer", ex.message)
+    }
 
     requestAnimationFrame(draw);
     // window.setTimeout(() => {
