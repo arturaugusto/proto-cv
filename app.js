@@ -8,15 +8,12 @@ const roiCanvas = document.getElementById('roiCanvas');
 const roiCanvasCtx = roiCanvas.getContext("2d", { willReadFrequently: true });
 
 
-let roiCanvasArr = ['1'].map(i => {
+let roiCanvasArr = '1,2,3,4,5,6'.split(',').map(i => {
   const roiXCanvas = document.getElementById('roi'+i+'Canvas');
   const roiXCanvasCtx = roiXCanvas.getContext("2d", { willReadFrequently: true });
 
   const maskXCanvas = document.getElementById('mask'+i+'Canvas');
   const maskXCanvasCtx = maskXCanvas.getContext("2d");
-
-  const pclinesXCanvas = document.getElementById('pclines'+i+'Canvas');
-  const pclinesXCanvasCtx = maskXCanvas.getContext("2d");
 
 
   return {
@@ -25,9 +22,6 @@ let roiCanvasArr = ['1'].map(i => {
     
     maskCanvas: maskXCanvas,
     maskCanvasCtx: maskXCanvasCtx,
-    
-    pclinesCanvas: pclinesXCanvas,
-    pclinesCanvasCtx: pclinesXCanvasCtx,
   }
 })
 
@@ -76,115 +70,120 @@ video.addEventListener("play", () => {
       roiCanvasArr[i].roiCanvas.width = imageData1.width;
       roiCanvasArr[i].roiCanvas.height = imageData1.height;
       
-      let uint8array = Uint8Array.from(imageData1.data)
-
-      const sess = new gm.Session();
       
-      const t = new gm.Tensor('uint8', [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], uint8array);
-      
-      let pipeline = t
 
-      let hasPcLines = conf.pipeline.filter(c => c[0] && c[1] === 'pcLines').length
-      
-      let output
-      let canvasProcessed
-      
-      let lines = [];
+      if (conf.pipeline.filter(p => p[0]).length) {
+        let uint8array = Uint8Array.from(imageData1.data)
 
-      conf.pipeline.forEach(c => {
-        if (c[0]) {
-          if (c[1] === 'dilate' || c[1] === 'erode') {
-            pipeline = gm[c[1]](pipeline, [...c.slice(2)])
-          } else {
-            if (c[1] === 'pcLines') {
-              // allocate output tensor
-              output = gm.tensorFrom(pipeline);
-              sess.init(pipeline);
-              // run your operation
-              sess.runOp(pipeline, gmContextCount, output);
-              canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width);
-              gm.canvasFromTensor(canvasProcessed, output)
+        const sess = new gm.Session();
+        
+        const t = new gm.Tensor('uint8', [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], uint8array);
+        
+        let pipeline = t
 
-              
-              let imageData2 = gm.toImageData(output, true);
-              roiCanvasArr[i].maskCanvas.width = imageData2.width;
-              roiCanvasArr[i].maskCanvas.height = imageData2.height;
-              roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0);
+        let hasPcLines = conf.pipeline.filter(c => c[0] && c[1] === 'pcLines').length
+        
+        let output
+        let canvasProcessed
+        
+        let lines = [];
 
-
-              pipeline = gm[c[1]](pipeline, ...c.slice(2))
-
-              
-              output = gm.tensorFrom(pipeline);
-              sess.init(pipeline);
-              // run your operation
-              sess.runOp(pipeline, gmContextCount, output);
-
-              
-              for (let m = 0; m < output.size / 4; m += 1) {
-                const y = ~~(m / output.shape[1]);
-                const x = m - (y * output.shape[1]);
-                const value = output.get(y, x, 0);
-                const x0 = output.get(y, x, 1);
-                const y0 = output.get(y, x, 2);
-
-                if (value > 0.0) {
-                  lines.push([value, x0, y0]);
-                }
-              }
-
-              lines = lines.sort((b, a) => a[0] - b[0]);
-              // console.log(lines)
-              let nLines = conf.pipeline.filter(c => c[1] === 'pcLines')[0][5]
-              // console.log(nLines)
-              lines = lines.slice(0, nLines);
-
+        conf.pipeline.forEach(c => {
+          if (c[0]) {
+            if (c[1] === 'dilate' || c[1] === 'erode') {
+              pipeline = gm[c[1]](pipeline, [...c.slice(2)])
             } else {
-              pipeline = gm[c[1]](pipeline, ...c.slice(2))
+              if (c[1] === 'pcLines') {
+                // allocate output tensor
+                output = gm.tensorFrom(pipeline);
+                sess.init(pipeline);
+                // run your operation
+                sess.runOp(pipeline, gmContextCount, output);
+                canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width);
+                gm.canvasFromTensor(canvasProcessed, output)
+
+                
+                let imageData2 = gm.toImageData(output, true);
+                roiCanvasArr[i].maskCanvas.width = imageData2.width;
+                roiCanvasArr[i].maskCanvas.height = imageData2.height;
+                roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0);
+
+
+                pipeline = gm[c[1]](pipeline, ...c.slice(2))
+
+                
+                output = gm.tensorFrom(pipeline);
+                sess.init(pipeline);
+                // run your operation
+                sess.runOp(pipeline, gmContextCount, output);
+
+                
+                for (let m = 0; m < output.size / 4; m += 1) {
+                  const y = ~~(m / output.shape[1]);
+                  const x = m - (y * output.shape[1]);
+                  const value = output.get(y, x, 0);
+                  const x0 = output.get(y, x, 1);
+                  const y0 = output.get(y, x, 2);
+
+                  if (value > 0.0) {
+                    lines.push([value, x0, y0]);
+                  }
+                }
+
+                lines = lines.sort((b, a) => a[0] - b[0]);
+                // console.log(lines)
+                let nLines = conf.pipeline.filter(c => c[1] === 'pcLines')[0][5]
+                // console.log(nLines)
+                lines = lines.slice(0, nLines);
+
+              } else {
+                pipeline = gm[c[1]](pipeline, ...c.slice(2))
+              }
             }
           }
+        })
+
+
+
+        // hide if pcLInes...
+        if (!hasPcLines) {
+          output = gm.tensorFrom(pipeline);
+          sess.init(pipeline);
+          sess.runOp(pipeline, gmContextCount, output);
+          canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width);
+          gm.canvasFromTensor(canvasProcessed, output)
+
+          let imageData2 = gm.toImageData(output, true)
+          roiCanvasArr[i].maskCanvas.width = imageData2.width
+          roiCanvasArr[i].maskCanvas.height = imageData2.height
+          roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0)
         }
-      })
 
 
+        const maxP = Math.max(t.shape[0], t.shape[1]);
 
-      // hide if pcLInes...
-      if (!hasPcLines) {
-        output = gm.tensorFrom(pipeline);
-        sess.init(pipeline);
-        sess.runOp(pipeline, gmContextCount, output);
-        canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width);
-        gm.canvasFromTensor(canvasProcessed, output)
+        gmContextCount += 1;
+        sess.destroy()
 
-        let imageData2 = gm.toImageData(output, true)
-        roiCanvasArr[i].maskCanvas.width = imageData2.width
-        roiCanvasArr[i].maskCanvas.height = imageData2.height
-        roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0)
+        // console.log(lines)
+        
+        let upsampleFactor = 1
+        let upsampleConf = conf.pipeline.filter(c => c[0] && c[1] === 'upsample')[0]
+        if (upsampleConf) upsampleFactor = upsampleConf[2]
+
+        // console.log(upsampleFactor)
+        // TODO: not working with pclines+upsample
+        for (let m = 0; m < lines.length; m += 1) {
+          context.line.fromParallelCoords(
+            lines[m][1] / upsampleFactor,
+            lines[m][2] / upsampleFactor,
+            t.shape[1], t.shape[0], maxP, maxP / 2,
+          );
+          // console.log(context.line)
+          gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
+        }
       }
 
-
-      const maxP = Math.max(t.shape[0], t.shape[1]);
-
-      gmContextCount += 1;
-      sess.destroy()
-
-      // console.log(lines)
-      
-      let upsampleFactor = 1
-      let upsampleConf = conf.pipeline.filter(c => c[0] && c[1] === 'upsample')[0]
-      if (upsampleConf) upsampleFactor = upsampleConf[2]
-
-      // console.log(upsampleFactor)
-      // TODO: not working with pclines+upsample
-      for (let m = 0; m < lines.length; m += 1) {
-        context.line.fromParallelCoords(
-          lines[m][1] / upsampleFactor,
-          lines[m][2] / upsampleFactor,
-          t.shape[1], t.shape[0], maxP, maxP / 2,
-        );
-        // console.log(context.line)
-        gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-      }
 
 
 

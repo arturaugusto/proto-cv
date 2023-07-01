@@ -48,7 +48,7 @@
 
         <div class="row">
 
-          <div v-for="conf in state.confs" class="col-2">
+          <div v-for="conf in state.confs" class="col-2" @click="focusCol($event)">
             
             <div>
               <span class="is-vertical-align"><span style="width: 22px;">x:</span><input
@@ -287,7 +287,7 @@
           </div>
           <div class="col-2">
             <span>
-              <button class="button dark" @click="addConfRegion">add pipeline</button>
+              <button v-if="state && state.confs && state.confs.length < 6" class="button dark" @click="addConfRegion">add pipeline</button>
             </span>
           </div>
 
@@ -297,19 +297,30 @@
     </div>
 
     <video id="video" autoplay playsinline></video>
-    <div class="wrapper video-wrapper">
+    <div class="wrapper video-wrapper" id="videoWrapper">
       <canvas id="videoCanvas"></canvas>
       <canvas id="roiCanvas"></canvas>
     </div>
     
     <canvas id="roi1Canvas" style="visibility: collapse;"></canvas>
     <canvas id="mask1Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="pclines1Canvas" style="visibility: collapse;"></canvas>
-
 
     <canvas id="roi2Canvas" style="visibility: collapse;"></canvas>
     <canvas id="mask2Canvas" style="visibility: collapse;"></canvas>
-    <canvas id="pclines2Canvas" style="visibility: collapse;"></canvas>
+
+    <canvas id="roi3Canvas" style="visibility: collapse;"></canvas>
+    <canvas id="mask3Canvas" style="visibility: collapse;"></canvas>
+
+    <canvas id="roi4Canvas" style="visibility: collapse;"></canvas>
+    <canvas id="mask4Canvas" style="visibility: collapse;"></canvas>
+
+    <canvas id="roi5Canvas" style="visibility: collapse;"></canvas>
+    <canvas id="mask5Canvas" style="visibility: collapse;"></canvas>
+
+    <canvas id="roi6Canvas" style="visibility: collapse;"></canvas>
+    <canvas id="mask6Canvas" style="visibility: collapse;"></canvas>
+
+
 
     
   </main>
@@ -326,11 +337,18 @@
         }
       },
       methods: {
+        focusCol (e) {
+          let roiCanvas = document.getElementById('roiCanvas')
+          let targetBc = e.target.getBoundingClientRect()
+          roiCanvas.parentElement.style.left = targetBc .x+targetBc.width + 'px'
+
+          
+          // console.log(e, roiCanvas)
+        },
         addConfRegion () {
-          // this.state.confs.push(JSON.parse(JSON.stringify(this.confTemplate)))
-          conf = JSON.parse(JSON.stringify(this.confTemplate))
+          let conf = JSON.parse(JSON.stringify(this.confTemplate))
           conf.region = [10, 10, roiCanvas.width/2-10, 100]
-          console.log(this.state.confs)
+          this.state.confs.push(conf)
           // console.log('lala')
         },
         addTrigRect (conf) {

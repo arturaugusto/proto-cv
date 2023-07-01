@@ -2,6 +2,7 @@ html,
 body {
   margin: 0;
   padding: 0;
+
 }
 
 html {
@@ -17,19 +18,20 @@ video {
 .wrapper {
 /*  position: relative;*/
   position: fixed;
+  overflow: scroll;
 }
 
 .wrapper canvas {
 /*  position: absolute;*/
   position: fixed;
   display: block;
-  left: 50%;
-  transform: translate(-50%, -50%);
+/*  left: 50%;*/
+/*  transform: translate(-50%, -50%);*/
   max-height: 480px;
 }
 
 .video-wrapper {
-  top: 350px;
+  top: 20vh;
   
 }
 
