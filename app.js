@@ -272,6 +272,7 @@ video.addEventListener("play", () => {
         // }
 
         // Draw a red rectangle on the specified region
+        t.statePrev = t.state
         if (detectRatio >= t.histOn && !t.state) {
           t.state = true
           // console.log(detectRatio)
