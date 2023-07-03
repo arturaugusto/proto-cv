@@ -1,3 +1,6 @@
+
+
+
 const video = document.getElementById('video');
 const select = document.getElementById('select');
 
@@ -12,16 +15,10 @@ let roiCanvasArr = '1,2,3,4,5,6'.split(',').map(i => {
   const roiXCanvas = document.getElementById('roi'+i+'Canvas');
   const roiXCanvasCtx = roiXCanvas.getContext("2d", { willReadFrequently: true });
 
-  const maskXCanvas = document.getElementById('mask'+i+'Canvas');
-  const maskXCanvasCtx = maskXCanvas.getContext("2d");
-
 
   return {
     roiCanvas: roiXCanvas,
-    roiCanvasCtx: roiXCanvasCtx,
-    
-    maskCanvas: maskXCanvas,
-    maskCanvasCtx: maskXCanvasCtx,
+    roiCanvasCtx: roiXCanvasCtx,    
   }
 })
 
@@ -99,7 +96,7 @@ video.addEventListener("play", () => {
       
       
 
-      if (conf.pipeline.filter(p => p[0]).length) {
+      if (conf.pipeline.filter(p => p[0] && p[1] !== 'ocr').length) {
         let uint8array = Uint8Array.from(imageData1.data)
         const sess = new gm.Session();
         const t = new gm.Tensor('uint8', [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], uint8array);
@@ -113,7 +110,7 @@ video.addEventListener("play", () => {
         
         let lines = [];
         
-        conf.pipeline.forEach(c => {
+        conf.pipeline.filter(c => c[1] !== 'ocr').forEach(c => {
           if (c[0]) {
             let opName = c[1].split('_')[0]
 
@@ -137,8 +134,6 @@ video.addEventListener("play", () => {
 
                 
                 let imageData2 = gm.toImageData(output, true);
-                roiCanvasArr[i].maskCanvas.width = imageData2.width;
-                roiCanvasArr[i].maskCanvas.height = imageData2.height;
                 roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0);
 
 
@@ -186,8 +181,6 @@ video.addEventListener("play", () => {
           gm.canvasFromTensor(canvasProcessed, output)
 
           let imageData2 = gm.toImageData(output, true)
-          roiCanvasArr[i].maskCanvas.width = imageData2.width
-          roiCanvasArr[i].maskCanvas.height = imageData2.height
           roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0)
         }
 
@@ -304,8 +297,6 @@ video.addEventListener("play", () => {
         roiCanvasCtx.drawImage(roiCanvasArr[i].roiCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
       }
       
-      roiCanvasCtx.drawImage(roiCanvasArr[i].maskCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
-
     })
 
     
@@ -317,9 +308,29 @@ video.addEventListener("play", () => {
       console.error("Error execution postprocessing:", ex.message)
     }
 
-    requestAnimationFrame(draw);
-    // window.setTimeout(() => {
-    // }, 10)
+    Promise.all(state.confs.map((conf, conf_i) => {
+      let region = {
+        left: conf.region[0],
+        top: conf.region[1],
+        width: conf.region[2],
+        height: conf.region[3],
+      }
+
+      if (TESS_WORKERS[conf_i]) {
+        return TESS_WORKERS[conf_i].recognize(roiCanvasArr[conf_i].roiCanvas, {region})
+      }
+      return new Promise((resolve) => resolve(null))
+    }))
+    .then(results => {
+      console.log(results[0].data)
+    })
+    .catch(err => {
+      console.error("Error execution ocr:", err)
+    })
+    .finally(() => {
+      requestAnimationFrame(draw);
+    })
+
   };
   requestAnimationFrame(draw);  
 });
