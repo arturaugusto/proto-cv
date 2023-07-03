@@ -287,8 +287,10 @@
                   </select>
                   whitelist: <input
                     @change="pg($event, 'ocr')"
+                    type="text"
                     class="p-param"
                     v-model="p[4]">
+                  <p v-if="ocrMessage" style="background: #f2f716;color: black;">{{ocrMessage}}</p>
                 </span>
 
               </div>
@@ -416,13 +418,16 @@
       data() {
         return {
           stateChangeDebounce: undefined,
+          ocrMessage: '',
           state: {},
         }
       },
       methods: {
         pg (evt, changeSource) {
           if (changeSource === 'ocr')  {
+            // console.log(evt.target.parentElement)
             console.log('reload to apply changes')
+            this.ocrMessage = 'Reload page to apply changes'
           }
           window.clearTimeout(this.stateChangeDebounce)
           this.stateChangeDebounce = window.setTimeout(() => {
