@@ -121,14 +121,53 @@ video.addEventListener("play", () => {
 
               // output = gm.tensorFrom(pipeline)
               let imageDataFft = gm.toImageData(output, true)
-              let arrayFft = pipeline.dtype === 'float32' ? Float32Array.from(imageDataFft.data) : Uint8Array.from(imageDataFft.data)
-              for (let i = 0; i < arrayFft.length; i++) {
-                arrayFft[i] = 255
+
+
+              let arrayPreFft = pipeline.dtype === 'float32' ? Float32Array.from(imageDataFft.data) : Uint8Array.from(imageDataFft.data)
+
+              let sizes = new Array(30).fill().map((_, i) => Math.pow(2,i))
+              let inputSize = arrayPreFft.length/4
+              
+              let fftInputData = []
+              
+              // take power of 2 input
+              for (let s = 0; s < sizes.length; s++) {
+                if (sizes[s] >= inputSize) {
+                  for (let i = 0; i < sizes[s]; i += 4) {
+                    fftInputData.push(arrayPreFft[i])
+                  }
+                  break
+                }
+              }
+              // console.log(fftInputData.length)
+
+
+              let f = new FFTJS(fftInputData.length)
+              let fftOut = f.createComplexArray()
+              f.realTransform(fftOut, fftInputData)
+
+              fftOut = fftOut.slice(0, fftOut.length/2)
+
+              fftOut = fftOut.map(x => Math.log10(1+(Math.abs(x)*c[2])))
+              let fftOutMax = Math.max(...fftOut)
+              fftOut = fftOut.map(x => (x/fftOutMax)*255)
+              
+              
+              for (let i = 0; i < arrayPreFft.length; i += 4) {
+                arrayPreFft[i] =   fftOut[Math.floor(i/4)]
+                arrayPreFft[i+1] = fftOut[Math.floor(i/4)]
+                arrayPreFft[i+2] = fftOut[Math.floor(i/4)]
+                arrayPreFft[i+3] = 255
               }
 
-              let whiteTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], arrayFft)
+              // console.log(arrayPreFft.length, fftOut.length)
 
-              pipeline = gm.sub(whiteTensor, pipeline)
+              let darkTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4])
+              darkTensor.data.fill(0)
+              pipeline = gm.mult(darkTensor, pipeline)
+              
+              let fftTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], arrayPreFft)
+              pipeline = gm.add(fftTensor, pipeline)
 
             } else if (opName === 'invert') {
               let factor = upsampleConf ? upsampleConf[2] : 1

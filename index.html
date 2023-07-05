@@ -121,7 +121,7 @@
                     v-model="p[0]"><strong> {{p[1]}}{{p[2] !== undefined ? ':' : ''}} </strong>
                 </div>
 
-                <span v-if="p[1] === 'upsample'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'upsample'" class="p-param-wrap">
                   coefficient: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -139,7 +139,7 @@
                 </span>
 
 
-                <span v-if="p[1] === 'norm'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'norm'" class="p-param-wrap">
                   <select v-model="p[2]" class="p-param" @change="pg">
                     <option>l2</option>
                     <option>minmax</option>
@@ -147,7 +147,7 @@
                 </span>
 
 
-                <span v-if="p[1] === 'gaussianBlur'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'gaussianBlur'" class="p-param-wrap">
                   H: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -166,7 +166,7 @@
                     :max="8">
                 </span>
 
-                <span v-if="p[1] === 'colorSegmentation'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'colorSegmentation'" class="p-param-wrap">
                   Clusters: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -177,7 +177,7 @@
                     :max="10">
                 </span>
 
-                <span v-if="p[1] === 'adaptiveThreshold'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'adaptiveThreshold'" class="p-param-wrap">
                   Size: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -196,7 +196,29 @@
                     :max="100">
                 </span>
 
-                <span v-if="p[1] === 'cannyEdges'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'fft'" class="p-param-wrap">
+                  scale: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="0.0001"
+                    :min="0.0001"
+                    :max="1">
+                </span>
+
+                <span v-if="p[1].split('_')[0] === 'threshold'" class="p-param-wrap">
+                  thresh: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="0.01"
+                    :min="0"
+                    :max="1">
+                </span>
+
+                <span v-if="p[1].split('_')[0] === 'cannyEdges'" class="p-param-wrap">
                   High Threshold: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -215,7 +237,7 @@
                     :max="1">
                 </span>
 
-                <span v-if="p[1] === 'dilate'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'dilate'" class="p-param-wrap">
                   W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -234,7 +256,7 @@
                     :max="40">
                 </span>
 
-                <span v-if="p[1] === 'erode'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'erode'" class="p-param-wrap">
                   W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -255,7 +277,7 @@
 
 
 
-                <span v-if="p[1] === 'pcLines'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'pcLines'" class="p-param-wrap">
                   N lines: ({{p[5]}})<input
                     @change="pg"
                     class="p-param"
@@ -290,7 +312,7 @@
                     :max="4"> -->
                 </span>
 
-                <span v-if="p[1] === 'ocr'" class="p-param-wrap">
+                <span v-if="p[1].split('_')[0] === 'ocr'" class="p-param-wrap">
                   lang: <select v-model="p[2]" class="p-param" @change="pg($event, 'ocr')">
                     <option>eng</option>
                     <option>digits</option>
@@ -543,6 +565,7 @@
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],
             [false, 'colorSegmentation', 3],
+            [false, 'upsample_2', 3, 'nearest'],
             [false, 'adaptiveThreshold', 5, 15],
             [false, 'sobelOperator'],
             [false, 'cannyEdges', 0.25, 0.85],
@@ -550,8 +573,9 @@
             [false, 'dilate', 3, 3],
             [false, 'erode', 3, 3],
             [false, 'dilate_2', 3, 3],
+            [false, 'fft', 0.005],
+            [false, 'threshold', 0.5],
             [false, 'invert_2'],
-            [false, 'fft'],
             [false, 'pcLines', 2, 2, 2, 2],
             [false, 'ocr', 'eng', 'SINGLE_BLOCK', ''],
           ],
