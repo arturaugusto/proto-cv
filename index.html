@@ -122,7 +122,7 @@
                 </div>
 
                 <span v-if="p[1] === 'upsample'" class="p-param-wrap">
-                  coefficient: <input
+                  coefficient: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -148,7 +148,7 @@
 
 
                 <span v-if="p[1] === 'gaussianBlur'" class="p-param-wrap">
-                  H: <input
+                  H: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -156,7 +156,7 @@
                     :step="2"
                     :min="3"
                     :max="8">
-                  H: <input
+                  H: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -167,7 +167,7 @@
                 </span>
 
                 <span v-if="p[1] === 'colorSegmentation'" class="p-param-wrap">
-                  Clusters: <input
+                  Clusters: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -178,7 +178,7 @@
                 </span>
 
                 <span v-if="p[1] === 'adaptiveThreshold'" class="p-param-wrap">
-                  Size: <input
+                  Size: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -186,7 +186,7 @@
                     :step="1"
                     :min="0"
                     :max="100">
-                  Value: <input
+                  Value: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -197,7 +197,7 @@
                 </span>
 
                 <span v-if="p[1] === 'cannyEdges'" class="p-param-wrap">
-                  High Threshold: <input
+                  High Threshold: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -205,7 +205,7 @@
                     :step="0.05"
                     :min="0"
                     :max="1">
-                  Low Threshold: <input
+                  Low Threshold: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -216,7 +216,7 @@
                 </span>
 
                 <span v-if="p[1] === 'dilate'" class="p-param-wrap">
-                  W: <input
+                  W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -224,7 +224,7 @@
                     :step="1"
                     :min="1"
                     :max="40">
-                  H: <input
+                  H: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -235,7 +235,7 @@
                 </span>
 
                 <span v-if="p[1] === 'erode'" class="p-param-wrap">
-                  W: <input
+                  W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -243,7 +243,7 @@
                     :step="1"
                     :min="1"
                     :max="40">
-                  H: <input
+                  H: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -256,7 +256,7 @@
 
 
                 <span v-if="p[1] === 'pcLines'" class="p-param-wrap">
-                  N lines: <input
+                  N lines: ({{p[5]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -264,7 +264,7 @@
                     :step="1"
                     :min="1"
                     :max="50">
-                  Layers: <input
+                  Layers: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -272,7 +272,7 @@
                     :step="1"
                     :min="1"
                     :max="4">
-<!--                   dStep: <input
+<!--                   dStep: ({{p[3]}})<input
     @change="pg"
                     class="p-param"
                     type="range"
@@ -280,7 +280,7 @@
                     :step="1"
                     :min="1"
                     :max="4">
-                  dCoeficient: <input
+                  dCoeficient: ({{p[4]}})<input
                     @change="pg"
                     class="p-param"
                     type="range"
@@ -315,48 +315,52 @@
             <div v-for="(t, j) in conf.trigRects" :key="j" class="bd-dark" :class="{'bg-success': t.state, '_bg-grey': !t.state}" style="padding: 6px;">
               <div><strong>triggerRect</strong></div>
               <span class="p-param-wrap">              
-                x: <input
+                x ({{t.roi[0]}}): <input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.roi[0]" @input="(x) => parseFloat(x.target.value)"
+                  :value="t.roi[0]" @input="(x) => t.roi[0] = parseFloat(x.target.value)"
                   :step="1"
+                  :max="600"
                   :min="1">
-                y: <input
+                y ({{t.roi[1]}}): <input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.roi[1]" @input="(x) => parseFloat(x.target.value)"
+                  :value="t.roi[1]" @input="(x) => t.roi[1] = parseFloat(x.target.value)"
                   :step="1"
+                  :max="480"
                   :min="1">
-                w: <input
+                w ({{t.roi[2]}}): <input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.roi[2]" @input="(x) => parseFloat(x.target.value)"
+                  :value="t.roi[2]" @input="(x) => t.roi[2] = parseFloat(x.target.value)"
                   :step="1"
+                  :max="600"
                   :min="1">
-                h: <input
+                h ({{t.roi[3]}}): <input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.roi[3]" @input="(x) => parseFloat(x.target.value)"
+                  :value="t.roi[3]" @input="(x) => t.roi[3] = parseFloat(x.target.value)"
                   :step="1"
+                  :max="480"
                   :min="1">
-                histOn: <input
+                histOn: ({{t.histOn}})<input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.histOn" @input="(x) => parseFloat(x.target.value)"
-                  :step="0.1"
-                  :min="0"
+                  :value="t.histOn" @input="(x) => t.histOn = parseFloat(x.target.value)"
+                  :step="0.001"
+                  :min="0.001"
                   :max="1">
-                histOff: <input
+                histOff: ({{t.histOff}})<input
                   @change="pg"
                   class="p-param"
                   type="range"
-                  :value="t.histOff" @input="(x) => parseFloat(x.target.value)"
-                  :step="0.1"
+                  :value="t.histOff" @input="(x) => t.histOff = parseFloat(x.target.value)"
+                  :step="0.001"
                   :min="0"
                   :max="1">
               </span>
