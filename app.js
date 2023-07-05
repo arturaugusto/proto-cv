@@ -114,7 +114,23 @@ video.addEventListener("play", () => {
           if (c[0]) {
             let opName = c[1].split('_')[0]
 
-            if (opName === 'invert') {
+            if (opName === 'fft') {
+              output = gm.tensorFrom(pipeline);
+              sess.init(pipeline);
+              sess.runOp(pipeline, gmContextCount, output);
+
+              // output = gm.tensorFrom(pipeline)
+              let imageDataFft = gm.toImageData(output, true)
+              let arrayFft = pipeline.dtype === 'float32' ? Float32Array.from(imageDataFft.data) : Uint8Array.from(imageDataFft.data)
+              for (let i = 0; i < arrayFft.length; i++) {
+                arrayFft[i] = 255
+              }
+
+              let whiteTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], arrayFft)
+
+              pipeline = gm.sub(whiteTensor, pipeline)
+
+            } else if (opName === 'invert') {
               let factor = upsampleConf ? upsampleConf[2] : 1
               let whiteTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height*factor, roiCanvasArr[i].roiCanvas.width*factor, 4])
 
@@ -322,7 +338,9 @@ video.addEventListener("play", () => {
       return new Promise((resolve) => resolve(null))
     }))
     .then(results => {
-      console.log(results[0].data)
+      if (results[0]) {
+        console.log(results[0].data)
+      }
     })
     .catch(err => {
       console.error("Error execution ocr:", err)
