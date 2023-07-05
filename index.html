@@ -59,25 +59,37 @@
               <span class="is-vertical-align"><span style="width: 26px;">&nbsp;x:</span><input
                 @change="pg"
                   class="p-param"
-                  type="number"
+                  type="range"
+                  max="600"
+                  min="0"
+                  step="1"
                   name=""
                   v-model="conf.region[0]"></span>
               <span class="is-vertical-align"><span style="width: 26px;">&nbsp;y:</span><input
                 @change="pg"
                   class="p-param"
-                  type="number"
+                  type="range"
+                  max="480"
+                  min="0"
+                  step="1"
                   name=""
                   v-model="conf.region[1]"></span>
               <span class="is-vertical-align"><span style="width: 26px;">&nbsp;w:</span><input
                 @change="pg"
                   class="p-param"
-                  type="number"
+                  type="range"
+                  max="600"
+                  min="1"
+                  step="1"
                   name=""
                   v-model="conf.region[2]"></span>
               <span class="is-vertical-align"><span style="width: 26px;">&nbsp;h:</span><input
                 @change="pg"
                   class="p-param"
-                  type="number"
+                  type="range"
+                  max="480"
+                  min="1"
+                  step="1"
                   name=""
                   v-model="conf.region[3]"></span>
               <div>
@@ -113,8 +125,8 @@
                   coefficient: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="10">
@@ -139,16 +151,16 @@
                   H: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="2"
                     :min="3"
                     :max="8">
                   H: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="2"
                     :min="3"
                     :max="8">
@@ -158,8 +170,8 @@
                   Clusters: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="2"
                     :max="10">
@@ -169,16 +181,16 @@
                   Size: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="0"
                     :max="100">
                   Value: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="1"
                     :min="0"
                     :max="100">
@@ -188,16 +200,16 @@
                   High Threshold: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="0.05"
                     :min="0"
                     :max="1">
                   Low Threshold: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="0.05"
                     :min="0"
                     :max="1">
@@ -207,16 +219,16 @@
                   W: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="40">
                   H: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="40">
@@ -226,16 +238,16 @@
                   W: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="40">
                   H: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="40">
@@ -247,32 +259,32 @@
                   N lines: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[5]"
+                    type="range"
+                    :value="p[5]" @input="(x) => p[5] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="50">
                   Layers: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[2]"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="4">
 <!--                   dStep: <input
     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[3]"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="4">
                   dCoeficient: <input
                     @change="pg"
                     class="p-param"
-                    type="number"
-                    v-model="p[4]"
+                    type="range"
+                    :value="p[4]" @input="(x) => p[4] = parseFloat(x.target.value)"
                     :step="1"
                     :min="1"
                     :max="4"> -->
@@ -306,44 +318,44 @@
                 x: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.roi[0]"
+                  type="range"
+                  :value="t.roi[0]" @input="(x) => parseFloat(x.target.value)"
                   :step="1"
                   :min="1">
                 y: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.roi[1]"
+                  type="range"
+                  :value="t.roi[1]" @input="(x) => parseFloat(x.target.value)"
                   :step="1"
                   :min="1">
                 w: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.roi[2]"
+                  type="range"
+                  :value="t.roi[2]" @input="(x) => parseFloat(x.target.value)"
                   :step="1"
                   :min="1">
                 h: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.roi[3]"
+                  type="range"
+                  :value="t.roi[3]" @input="(x) => parseFloat(x.target.value)"
                   :step="1"
                   :min="1">
                 histOn: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.histOn"
+                  type="range"
+                  :value="t.histOn" @input="(x) => parseFloat(x.target.value)"
                   :step="0.1"
                   :min="0"
                   :max="1">
                 histOff: <input
                   @change="pg"
                   class="p-param"
-                  type="number"
-                  v-model="t.histOff"
+                  type="range"
+                  :value="t.histOff" @input="(x) => parseFloat(x.target.value)"
                   :step="0.1"
                   :min="0"
                   :max="1">
@@ -439,6 +451,7 @@
             // clear state data
             stateClone.confs.forEach(conf => {
               delete conf.lines
+              delete conf.ocrData
               if (conf.trigRects) {
                 conf.trigRects.forEach(trigRect => {
                   delete trigRect.state
@@ -561,7 +574,7 @@
         }
 
         this.myCodeMirror = CodeMirror(document.getElementById('code'), {
-          value: this.state.code || 'console.log(data)\n',
+          value: this.state.code || '',
           lineNumbers: true,
           // firstLineNumber: 10,
           mode: 'javascript',

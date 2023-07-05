@@ -79,11 +79,11 @@ video.addEventListener("play", () => {
     state.confs.forEach((conf, i) => {
       let upsampleConf = conf.pipeline.filter(c => c[0] && c[1].split('_')[0] === 'upsample')[0]
       // Crop desired region from first canvas
-      var imageData1 = videoCanvasCtx.getImageData(...conf.region);
+      var imageData1 = videoCanvasCtx.getImageData(...conf.region.map(parseFloat));
       // roiCanvasCtx.fillRect(...conf.region);
       roiCanvasCtx.strokeStyle = COLORS[i]
       roiCanvasCtx.lineWidth = 2
-      roiCanvasCtx.strokeRect(conf.region[0]-1, conf.region[1]-1, conf.region[2]+2, conf.region[3]+2)
+      roiCanvasCtx.strokeRect(parseFloat(conf.region[0])-1, parseFloat(conf.region[1])-1, parseFloat(conf.region[2])+2, parseFloat(conf.region[3])+2)
 
 
 
@@ -137,7 +137,7 @@ video.addEventListener("play", () => {
               whiteTensor.data.fill(255)
               pipeline = gm.sub(whiteTensor, pipeline)
             } else if (opName === 'dilate' || opName === 'erode') {
-              pipeline = gm[opName](pipeline, [...c.slice(2)])
+              pipeline = gm[opName](pipeline, [...c.slice(2).map(parseFloat)])
             } else {
               if (opName === 'pcLines') {
                 // allocate output tensor
@@ -154,7 +154,7 @@ video.addEventListener("play", () => {
 
 
                 // https://github.com/PeculiarVentures/GammaCV/blob/master/app/sources/examples/pc_lines.js
-                pipeline = gm[opName](pipeline, ...c.slice(2))
+                pipeline = gm[opName](pipeline, ...c.slice(2).map(parseFloat))
 
                 
                 output = gm.tensorFrom(pipeline);
@@ -338,9 +338,11 @@ video.addEventListener("play", () => {
       return new Promise((resolve) => resolve(null))
     }))
     .then(results => {
-      if (results[0]) {
-        console.log(results[0].data)
-      }
+      results.forEach((result, result_i) => {
+        if (result) {
+          state.confs[result_i].ocrData = result.data
+        }
+      })
     })
     .catch(err => {
       console.error("Error execution ocr:", err)
