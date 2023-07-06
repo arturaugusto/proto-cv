@@ -133,7 +133,7 @@ video.addEventListener("play", () => {
               // take power of 2 input
               for (let s = 0; s < sizes.length; s++) {
                 if (sizes[s] >= inputSize) {
-                  for (let i = 0; i < sizes[s]; i += 4) {
+                  for (let i = 0; i < sizes[s]*2; i += 4) {
                     fftInputData.push(arrayPreFft[i])
                   }
                   break
@@ -145,10 +145,12 @@ video.addEventListener("play", () => {
               let f = new FFTJS(fftInputData.length)
               let fftOut = f.createComplexArray()
               f.realTransform(fftOut, fftInputData)
+              f.completeSpectrum(fftOut)
 
               fftOut = fftOut.slice(0, fftOut.length/2)
 
-              fftOut = fftOut.map(x => Math.log10(1+(Math.abs(x)*c[2])))
+              fftOut = fftOut.map(x => Math.log10(100+(Math.abs(x)*c[2])))
+              // fftOut = fftOut.map(x => Math.log10(1+(Math.abs(x*x)*c[2])))
               let fftOutMax = Math.max(...fftOut)
               fftOut = fftOut.map(x => (x/fftOutMax)*255)
               
