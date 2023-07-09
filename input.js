@@ -115,11 +115,12 @@ function makeElementDraggable(element) {
       pos3 = e.clientX;
       pos4 = e.clientY;
     }
-
     if (handlerConfs && handlerConfs.length) {
       handlerConfs.forEach(conf => {
-        if ((conf.region[2] - pos1) > 1) conf.region[2] -= pos1
-        if ((conf.region[3] - pos2) > 1) conf.region[3] -= pos2
+        if (conf.region[2] - pos1 > 0 && conf.region[3] - pos2 > 0) {
+          conf.region[2] -= pos1
+          conf.region[3] -= pos2
+        }
       })
       return
     }
