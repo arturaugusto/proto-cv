@@ -56,9 +56,36 @@ function makeElementDraggable(element) {
   element.addEventListener('mousedown', dragMouseDown);
   element.addEventListener('touchstart', dragMouseDown);
 
+  let confs, handlerConfs
+
   function dragMouseDown(e) {
     e = e || window.event;
     e.preventDefault();
+
+    let rect = element.getBoundingClientRect()
+    let x = e.clientX - rect.left
+    let y = e.clientY - rect.top
+    state.confs.forEach(c => {c.region = c.region.map(parseFloat)})
+    
+    confs = state.confs.filter(c => {
+      return (
+        x >= c.region[0] &&
+        y >= c.region[1] &&
+        x <= (c.region[0] + c.region[2]) &&
+        y <= (c.region[1] + c.region[3])
+      )
+    })
+
+    handlerConfs = state.confs.filter(c => {
+      return (
+        x >= (c.region[0] + c.region[2]) &&
+        y >= (c.region[1] + c.region[3]) &&
+        x <= (c.region[0] + c.region[2] + 5) &&
+        y <= (c.region[1] + c.region[3] + 5)
+      )
+    })
+
+    
     if (e.type === 'touchstart') {
       pos3 = e.touches[0].clientX;
       pos4 = e.touches[0].clientY;
@@ -71,6 +98,8 @@ function makeElementDraggable(element) {
       document.addEventListener('mousemove', elementDrag);
     }
   }
+
+
 
   function elementDrag(e) {
     e = e || window.event;
@@ -86,6 +115,25 @@ function makeElementDraggable(element) {
       pos3 = e.clientX;
       pos4 = e.clientY;
     }
+
+    if (handlerConfs && handlerConfs.length) {
+      handlerConfs.forEach(conf => {
+        if ((conf.region[2] - pos1) > 1) conf.region[2] -= pos1
+        if ((conf.region[3] - pos2) > 1) conf.region[3] -= pos2
+      })
+      return
+    }
+
+    if (confs.length) {
+      confs.forEach(conf => {
+        conf.region[0] -= pos1
+        conf.region[1] -= pos2
+      })
+      return
+    }
+
+
+
     element.parentElement.style.top = (element.offsetTop - pos2) + "px";
     element.parentElement.style.left = (element.offsetLeft - pos1) + "px";
   }
