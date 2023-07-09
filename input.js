@@ -65,6 +65,8 @@ function makeElementDraggable(element) {
     let rect = element.getBoundingClientRect()
     let x = e.clientX - rect.left
     let y = e.clientY - rect.top
+
+    console.log(x, y)
     state.confs.forEach(c => {c.region = c.region.map(parseFloat)})
     
     confs = state.confs.filter(c => {

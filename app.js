@@ -365,32 +365,42 @@ video.addEventListener("play", () => {
       console.error("Error execution postprocessing:", ex.message)
     }
 
-    Promise.all(state.confs.map((conf, conf_i) => {
-      let region = {
-        left: conf.region[0],
-        top: conf.region[1],
-        width: conf.region[2],
-        height: conf.region[3],
-      }
-
-      if (TESS_WORKERS[conf_i]) {
-        return TESS_WORKERS[conf_i].recognize(roiCanvasArr[conf_i].roiCanvas, {region})
-      }
-      return new Promise((resolve) => resolve(null))
-    }))
-    .then(results => {
-      results.forEach((result, result_i) => {
-        if (result) {
-          state.confs[result_i].ocrData = result.data
+    if (!OCR_WORKING) {
+      OCR_WORKING = true
+      Promise.all(state.confs.map((conf, conf_i) => {
+        let region = {
+          left: conf.region[0],
+          top: conf.region[1],
+          width: conf.region[2],
+          height: conf.region[3],
         }
+
+        if (TESS_WORKERS[conf_i]) {
+          return TESS_WORKERS[conf_i].recognize(roiCanvasArr[conf_i].roiCanvas, {region})
+        }
+        return new Promise((resolve) => resolve(null))
+      }))
+      .then(results => {
+        results.forEach((result, result_i) => {
+          if (result) {
+            state.confs[result_i].ocrData = result.data
+            state.confs[result_i].ocrData.t = Date.now()
+          }
+        })
       })
-    })
-    .catch(err => {
-      console.error("Error execution ocr:", err)
-    })
-    .finally(() => {
+      .catch(err => {
+        console.error("Error execution ocr:", err)
+      })
+      .finally(() => {
+        OCR_WORKING = false
+      })
       requestAnimationFrame(draw);
-    })
+    } else {
+      window.setTimeout(() => {
+        requestAnimationFrame(draw);
+      }, 25)
+    }
+    
 
   };
   requestAnimationFrame(draw);  

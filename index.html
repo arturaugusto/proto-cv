@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Proto-CV</title>
+  <title>OkComputerVision</title>
   <link rel="stylesheet" href="./chota.min.css" />
   <link rel="stylesheet" href="./app.css" />
 
@@ -446,6 +446,7 @@
 
     let createWorker = Tesseract.createWorker;
     window.TESS_WORKERS = [null, null, null, null, null, null]
+    window.OCR_WORKING = false
 
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
 
@@ -514,8 +515,13 @@
             if (ocrParams) {
               let oldWorker = TESS_WORKERS[conf_i]
               let newWorker = null
-              createWorker({langPath: 'https://ocr.ipt.br', gzip: false})
-              // createWorker()
+              new Promise(resolve => {
+                if (window.location.host.indexOf('127.0.0.1') !== -1) {
+                  resolve(createWorker())
+                } else {
+                  resolve(createWorker({langPath: 'https://ocr.ipt.br', gzip: false}))
+                }
+              })
               .then(worker => {
                 newWorker = worker
                 return worker.loadLanguage(ocrParams[2])
@@ -540,6 +546,12 @@
               })
               .then(_ => {
                 TESS_WORKERS[conf_i] = newWorker
+              })
+              .catch(err => {
+                console.log(err)
+              })
+              .finally(_=> {
+                console.log('ocr ready')
               })
             } else {
 
