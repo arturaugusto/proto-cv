@@ -262,7 +262,7 @@ video.addEventListener("play", () => {
           );
           // console.log(context.line)
           gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-          // conf.lines = lines
+          conf.lines = lines
         }
       }
 
