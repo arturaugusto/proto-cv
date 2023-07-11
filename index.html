@@ -479,6 +479,7 @@
             stateClone.confs.forEach(conf => {
               delete conf.lines
               delete conf.ocrData
+              delete conf.roiCanvasCtx
               if (conf.trigRects) {
                 conf.trigRects.forEach(trigRect => {
                   delete trigRect.state
@@ -517,7 +518,7 @@
               let newWorker = null
               new Promise(resolve => {
                 if (window.location.host.indexOf('127.0.0.1') !== -1) {
-                  resolve(createWorker())
+                  resolve(createWorker({langPath: 'http://127.0.0.1:8000', gzip: false}))
                 } else {
                   resolve(createWorker({langPath: 'https://ocr.ipt.br', gzip: false}))
                 }
@@ -570,6 +571,7 @@
       mounted () {
         this.colors = window.COLORS
         let confTemplate = {
+          showpp: true,
           region: [10,10,100,100],
           pipeline: [
             [false, 'upsample', 3, 'nearest'],

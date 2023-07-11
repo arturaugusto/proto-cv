@@ -85,8 +85,6 @@ video.addEventListener("play", () => {
       roiCanvasCtx.lineWidth = 2
       roiCanvasCtx.strokeRect(parseFloat(conf.region[0])-1, parseFloat(conf.region[1])-1, parseFloat(conf.region[2])+2, parseFloat(conf.region[3])+2)
 
-
-
       videoCanvasCtx.drawImage(video, 0, 0, videoCanvas.width, videoCanvas.height);
 
       roiCanvasArr[i].roiCanvasCtx.putImageData(imageData1, 0, 0);
@@ -358,8 +356,8 @@ video.addEventListener("play", () => {
 
     
     try {
-      let postProcFun = new Function('pipelines', 'state', myCodeMirror.getValue());
-      postProcFun(state.confs, POSTPROCESS_STATE)
+      let postProcFun = new Function('pipelines', 'state', 'ctx', myCodeMirror.getValue());
+      postProcFun(state.confs, POSTPROCESS_STATE, roiCanvasCtx)
     } 
     catch (ex) {
       console.error("Error execution postprocessing:", ex.message)
