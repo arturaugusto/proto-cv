@@ -30,7 +30,7 @@ video {
 
 .video-wrapper {
   top: 400px;
-  
+  z-index: 999999;
 }
 
 input, select, button {

@@ -101,7 +101,8 @@ video.addEventListener("play", () => {
         
         let pipeline = t
 
-        let hasPcLines = conf.pipeline.filter(c => c[0] && c[1] === 'pcLines').length
+        let pcLinesOps = conf.pipeline.filter(c => c[0] && c[1] === 'pcLines')
+        let hasPcLines = pcLinesOps.length
         
         let output
         let canvasProcessed
@@ -240,28 +241,36 @@ video.addEventListener("play", () => {
         }
 
 
+        // show pclines?
         const maxP = Math.max(t.shape[0], t.shape[1]);
+
+
+        // console.log(lines)
+        delete conf.lines
+        if (pcLinesOps[0] && pcLinesOps[0][6]) {
+          conf.lines = []
+          let upsampleFactor = 1
+          if (upsampleConf) upsampleFactor = upsampleConf[2]
+
+          // console.log(upsampleFactor)
+          // TODO: not working with pclines+upsample
+          for (let m = 0; m < lines.length; m += 1) {
+            context.line.fromParallelCoords(
+              lines[m][1] / upsampleFactor,
+              lines[m][2] / upsampleFactor,
+              t.shape[1], t.shape[0], maxP, maxP / 2,
+            );
+            gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
+            let line = {}
+            ;['angle', 'x1', 'x2', 'y1', 'y2', 'px', 'py'].forEach(item => {
+              line[item] = context.line[item]
+            })
+            conf.lines.push(line)
+          }
+        }
 
         gmContextCount += 1;
         sess.destroy()
-
-        // console.log(lines)
-        
-        let upsampleFactor = 1
-        if (upsampleConf) upsampleFactor = upsampleConf[2]
-
-        // console.log(upsampleFactor)
-        // TODO: not working with pclines+upsample
-        for (let m = 0; m < lines.length; m += 1) {
-          context.line.fromParallelCoords(
-            lines[m][1] / upsampleFactor,
-            lines[m][2] / upsampleFactor,
-            t.shape[1], t.shape[0], maxP, maxP / 2,
-          );
-          // console.log(context.line)
-          gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-          conf.lines = lines
-        }
       }
 
 
@@ -356,7 +365,7 @@ video.addEventListener("play", () => {
 
     
     try {
-      let postProcFun = new Function('pipelines', 'state', 'ctx', myCodeMirror.getValue());
+      let postProcFun = new Function('regions', 'state', 'ctx', myCodeMirror.getValue());
       postProcFun(state.confs, POSTPROCESS_STATE, roiCanvasCtx)
     } 
     catch (ex) {

@@ -310,6 +310,16 @@
                     :step="1"
                     :min="1"
                     :max="4"> -->
+                  <input
+                    @change="pg"
+                    class="p-param"
+                    type="checkbox"
+                    name=""
+                    v-model="p[6]">
+                    <strong>show lines</strong>
+              
+
+
                 </span>
 
                 <span v-if="p[1].split('_')[0] === 'ocr'" class="p-param-wrap">
@@ -444,11 +454,12 @@
 
   <script type="module">
 
-    let createWorker = Tesseract.createWorker;
+    const createWorker = Tesseract.createWorker;
     window.TESS_WORKERS = [null, null, null, null, null, null]
     window.OCR_WORKING = false
 
     import { createApp } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js'
+    import JSONCrush from './JSONCrush.min.js'
 
     createApp({
       watch : {
@@ -480,6 +491,7 @@
               delete conf.lines
               delete conf.ocrData
               delete conf.roiCanvasCtx
+              conf.pipeline = conf.pipeline.filter(p => p[0])
               if (conf.trigRects) {
                 conf.trigRects.forEach(trigRect => {
                   delete trigRect.state
@@ -487,7 +499,8 @@
               }
             })
 
-            let permalinkText = window.location.origin + window.location.pathname + '#/' + JSON.stringify(stateClone)
+
+            let permalinkText = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(JSONCrush.crush(JSON.stringify(stateClone)))
             history.pushState(null, "", permalinkText)
             console.log('permalinkDone')
           }, 500)
@@ -590,7 +603,7 @@
             [false, 'dilate_2', 3, 3],
             [false, 'threshold', 0.5],
             [false, 'invert_2'],
-            [false, 'pcLines', 2, 2, 2, 2],
+            [false, 'pcLines', 2, 2, 2, 2, true],
             [false, 'ocr', 'eng', 'SINGLE_BLOCK', ''],
           ],
           trigRects: []
@@ -606,7 +619,7 @@
 
         let urlState = window.location.href.split('#/')[1]
         if (urlState) {
-          Object.assign(this.state, JSON.parse(decodeURI(urlState)))
+          Object.assign(this.state, JSON.parse(JSONCrush.uncrush(decodeURIComponent(urlState))))
           this.state.confs.forEach(loadedConf => {
             loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
               // add if filter dony exists on loaded conf
