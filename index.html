@@ -327,6 +327,7 @@
                     <option>eng</option>
                     <option>digits</option>
                     <option>7seg</option>
+                    <option>digits+7seg</option>
                   </select>
                   PSM: <select v-model="p[3]" class="p-param" @change="pg($event, 'ocr')">
                     <option v-for="psm_option in PSM_OPTIONS" :key="psm_option">{{psm_option}}</option>
@@ -416,7 +417,7 @@
 
     <div class="row is-marginless" style="padding-top: 20px;">
       <div class="col-12">
-        <div>postprocessing code:</div>
+        <div>postprocessing code: <a id="loadSampleCode">(load sample code)</a></div>
         <div id="code"></div>
         <textarea style="width: 90vw;height: 40vh;margin-top: 6px;"></textarea>
       </div>
@@ -591,10 +592,10 @@
             [false, 'norm', 'l2'],
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],
-            [false, 'fft', 0.005],
+            // [false, 'fft', 0.005],
             [false, 'colorSegmentation', 3],
             [false, 'upsample_2', 3, 'nearest'],
-            [false, 'adaptiveThreshold', 5, 15],
+            [false, 'adaptiveThreshold', 60, 15],
             [false, 'sobelOperator'],
             [false, 'cannyEdges', 0.25, 0.85],
             [false, 'invert'],
@@ -619,13 +620,17 @@
 
         let urlState = window.location.href.split('#/')[1]
         if (urlState) {
-          Object.assign(this.state, JSON.parse(JSONCrush.uncrush(decodeURIComponent(urlState))))
-          this.state.confs.forEach(loadedConf => {
-            loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
-              // add if filter dony exists on loaded conf
-              return loadedConf.pipeline.filter(p => p[1] === pItemTpl[1])[0] || JSON.parse(JSON.stringify(pItemTpl))
+          try {
+            Object.assign(this.state, JSON.parse(JSONCrush.uncrush(decodeURIComponent(urlState))))
+            this.state.confs.forEach(loadedConf => {
+              loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
+                // add if filter dony exists on loaded conf
+                return loadedConf.pipeline.filter(p => p[1] === pItemTpl[1])[0] || JSON.parse(JSON.stringify(pItemTpl))
+              })
             })
-          })
+          } catch (e){
+            history.pushState(null, "", window.location.origin + window.location.pathname)
+          }
         }
 
         this.myCodeMirror = CodeMirror(document.getElementById('code'), {

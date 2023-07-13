@@ -151,3 +151,38 @@ function makeElementDraggable(element) {
 
 makeElementDraggable(document.getElementById('roiCanvas'))
 
+
+document.getElementById('loadSampleCode').addEventListener('click', () => {
+  let code = `//set colors to be used on canvas 
+ctx.fillStyle = "green"
+ctx.font = "22px Arial"
+
+regions.forEach(region => {
+  if (region.trigRects) {
+    region.trigRects.filter(tr => {
+      return tr.state && !tr.statePrev
+    }).forEach(tr => {
+      playTone(100+tr.roi[1]*10, 800)
+    })
+  }
+  if (region.lines) {
+    let vertLines = region.lines.filter(l => l.angle > 80 && l.angle < 100)
+    let averageAngle = vertLines.reduce((a, c) => a+c.angle, 0)/vertLines.length
+    if (!isNaN(averageAngle)) {
+      ctx.fillText(averageAngle.toFixed(1)+"°", region.region[0]+region.region[2]+5, region.region[1]+region.region[3]/2)
+    }
+  }
+  if (region.ocrData) {
+    if (region.ocrData.text) {
+      ctx.fillText(region.ocrData.text, region.region[0]+region.region[2]/2, region.region[1]+region.region[3]+20)
+      ctx.fillStyle = region.ocrData.confidence > 85 ? "green" : "red"
+      ctx.fillText(""+region.ocrData.confidence+ "%", region.region[0]+region.region[2]/2, region.region[1]+region.region[3]+40)
+    }
+  }
+})
+
+`
+  
+  if (window.confirm('This will overwrite current code. Are you sure?')) window.myCodeMirror.setValue(code)
+  
+})
