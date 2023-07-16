@@ -274,15 +274,28 @@ video.addEventListener("play", () => {
               t.shape[1], t.shape[0], maxP, maxP / 2,
             );
             gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
-            // console.log(lines[m][1], lines[m][2], t.shape[1], maxP)
-            let line = {}
+            
+            // see https://github.com/PeculiarVentures/GammaCV/issues/120
+            // and https://codepen.io/WorldThirteen/pen/NWpVrMb to handle line intersection
+            const bottomIntersection = gm.Line.Intersection(
+              new gm.Line(0, roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, roiCanvasArr[i].roiCanvas.height),
+              context.line,
+            );
+            const rightIntersection = gm.Line.Intersection(
+              new gm.Line(roiCanvasArr[i].roiCanvas.width, 0, roiCanvasArr[i].roiCanvas.width, roiCanvasArr[i].roiCanvas.height),
+              context.line,
+            );
+
+            let line = {
+              bottomIntersection: bottomIntersection,
+              rightIntersection: rightIntersection
+            }
+            
             ;['angle', 'x1', 'x2', 'y1', 'y2', 'px', 'py'].forEach(item => {
               line[item] = context.line[item]
             })
-            // see https://github.com/PeculiarVentures/GammaCV/issues/120
-            // and https://codepen.io/WorldThirteen/pen/NWpVrMb to handle line intersection
-
             conf.lines.push(line)
+
           }
         }
 
