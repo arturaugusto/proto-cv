@@ -1,6 +1,14 @@
 // INPUT
+let mouseCoordDiv = document.getElementById("mouseCoordDiv")
 
+roiCanvas.addEventListener('mousemove', (evt) => {
+  var rect = roiCanvas.getBoundingClientRect();
 
+  let x = Math.round(evt.clientX - rect.left)
+  let y = Math.round(evt.clientY - rect.top)
+  mouseCoordDiv.innerHTML = `x: ${x} y: ${y}`
+  // console.log(x, y)
+});
 
 // const setRoiCanvasSel = (canvas, ctx) => {
 //   // Variables to store the region of interest
@@ -66,7 +74,6 @@ function makeElementDraggable(element) {
     let x = e.clientX - rect.left
     let y = e.clientY - rect.top
 
-    console.log(x, y)
     state.confs.forEach(c => {c.region = c.region.map(parseFloat)})
     
     confs = state.confs.filter(c => {

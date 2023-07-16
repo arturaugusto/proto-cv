@@ -1,6 +1,4 @@
 
-
-
 const video = document.getElementById('video');
 const select = document.getElementById('select');
 
@@ -77,7 +75,6 @@ video.addEventListener("play", () => {
     roiCanvasCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height)
     
     state.confs.forEach((conf, i) => {
-      let upsampleConf = conf.pipeline.filter(c => c[0] && c[1].split('_')[0] === 'upsample')[0]
       // Crop desired region from first canvas
       var imageData1 = videoCanvasCtx.getImageData(...conf.region.map(parseFloat));
       // roiCanvasCtx.fillRect(...conf.region);
@@ -97,6 +94,27 @@ video.addEventListener("play", () => {
       if (conf.pipeline.filter(p => p[0] && p[1] !== 'ocr').length) {
         let uint8array = Uint8Array.from(imageData1.data)
         const sess = new gm.Session();
+
+
+        const cropOpKernel = `
+        vec4 operation(float y, float x) {
+          return pickValue_tSrc(y + float(CY), x + float(CX));
+        }
+        `;
+
+        const cropOp = (tSrc, x, y, w, h) => new gm.RegisterOperation('crop')
+          .Input('tSrc', tSrc.dtype)
+          .Output(tSrc.dtype)
+          .Constant('CX', x)
+          .Constant('CY', y)
+          .LoadChunk('pickValue')
+          .GLSLKernel(cropOpKernel)
+          .SetShapeFn(() => [h, w, 4])
+          .Compile({ tSrc });
+
+
+
+
         const t = new gm.Tensor('uint8', [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], uint8array);
         
         let pipeline = t
@@ -171,9 +189,7 @@ video.addEventListener("play", () => {
               pipeline = gm.add(fftTensor, pipeline)
 
             } else if (opName === 'invert') {
-              let factor = upsampleConf ? upsampleConf[2] : 1
-              let whiteTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height*factor, roiCanvasArr[i].roiCanvas.width*factor, 4])
-
+              let whiteTensor = new gm.Tensor(pipeline.dtype, [...pipeline.shape])
               whiteTensor.data.fill(255)
               pipeline = gm.sub(whiteTensor, pipeline)
             } else if (opName === 'dilate' || opName === 'erode') {
@@ -181,22 +197,19 @@ video.addEventListener("play", () => {
             } else {
               if (opName === 'pcLines') {
                 // allocate output tensor
-                output = gm.tensorFrom(pipeline);
-                sess.init(pipeline);
+                output = gm.tensorFrom(pipeline)
+                sess.init(pipeline)
                 // run your operation
                 sess.runOp(pipeline, gmContextCount, output);
-                canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width);
+                canvasProcessed = gm.canvasCreate(roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width)
                 gm.canvasFromTensor(canvasProcessed, output)
 
-                
                 let imageData2 = gm.toImageData(output, true);
-                roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0);
-
+                roiCanvasArr[i].roiCanvasCtx.putImageData(imageData2, 0, 0)
 
                 // https://github.com/PeculiarVentures/GammaCV/blob/master/app/sources/examples/pc_lines.js
                 pipeline = gm[opName](pipeline, ...c.slice(2).map(parseFloat))
 
-                
                 output = gm.tensorFrom(pipeline);
                 sess.init(pipeline);
                 // run your operation
@@ -205,10 +218,10 @@ video.addEventListener("play", () => {
                 
                 for (let m = 0; m < output.size / 4; m += 1) {
                   const y = ~~(m / output.shape[1]);
-                  const x = m - (y * output.shape[1]);
-                  const value = output.get(y, x, 0);
-                  const x0 = output.get(y, x, 1);
-                  const y0 = output.get(y, x, 2);
+                  const x = m - (y * output.shape[1])
+                  const value = output.get(y, x, 0)
+                  const x0 = output.get(y, x, 1)
+                  const y0 = output.get(y, x, 2)
 
                   if (value > 0.0) {
                     lines.push([value, x0, y0]);
@@ -221,6 +234,11 @@ video.addEventListener("play", () => {
                 conf.lines = lines
               } else {
                 pipeline = gm[opName](pipeline, ...c.slice(2))
+                
+                if (opName === 'upsample') {
+                  // crop upsampled region
+                  pipeline = cropOp(pipeline, 0, 0, Math.round(pipeline.shape[1]/c[2]), Math.round(pipeline.shape[0]/c[2]));
+                }
               }
             }
           }
@@ -249,22 +267,21 @@ video.addEventListener("play", () => {
         delete conf.lines
         if (pcLinesOps[0] && pcLinesOps[0][6]) {
           conf.lines = []
-          let upsampleFactor = 1
-          if (upsampleConf) upsampleFactor = upsampleConf[2]
-
-          // console.log(upsampleFactor)
-          // TODO: not working with pclines+upsample
           for (let m = 0; m < lines.length; m += 1) {
             context.line.fromParallelCoords(
-              lines[m][1] / upsampleFactor,
-              lines[m][2] / upsampleFactor,
+              lines[m][1] / 1,
+              lines[m][2] / 1,
               t.shape[1], t.shape[0], maxP, maxP / 2,
             );
             gm.canvasDrawLine(roiCanvasArr[i].roiCanvas, context.line, 'rgba(0, 255, 0, 1.0)')
+            // console.log(lines[m][1], lines[m][2], t.shape[1], maxP)
             let line = {}
             ;['angle', 'x1', 'x2', 'y1', 'y2', 'px', 'py'].forEach(item => {
               line[item] = context.line[item]
             })
+            // see https://github.com/PeculiarVentures/GammaCV/issues/120
+            // and https://codepen.io/WorldThirteen/pen/NWpVrMb to handle line intersection
+
             conf.lines.push(line)
           }
         }
