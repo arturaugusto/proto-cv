@@ -233,12 +233,15 @@ video.addEventListener("play", () => {
                 lines = lines.slice(0, nLines);
                 conf.lines = lines
               } else {
+
                 pipeline = gm[opName](pipeline, ...c.slice(2))
                 
                 if (opName === 'upsample') {
                   // crop upsampled region
                   pipeline = cropOp(pipeline, 0, 0, Math.round(pipeline.shape[1]/c[2]), Math.round(pipeline.shape[0]/c[2]));
                 }
+
+
               }
             }
           }
@@ -290,7 +293,7 @@ video.addEventListener("play", () => {
               bottomIntersection: bottomIntersection,
               rightIntersection: rightIntersection
             }
-            
+
             ;['angle', 'x1', 'x2', 'y1', 'y2', 'px', 'py'].forEach(item => {
               line[item] = context.line[item]
             })

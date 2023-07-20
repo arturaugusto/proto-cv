@@ -142,6 +142,53 @@
 
                 </span>
 
+                <span v-if="p[1].split('_')[0] === 'downsample'" class="p-param-wrap">
+                  coefficient: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="1"
+                    :min="1"
+                    :max="10">
+
+                  <select v-model="p[3]" class="p-param" @change="pg">
+                    <option>nearest</option>
+                    <option>bicubic</option>
+                  </select>
+
+                </span>
+
+
+
+                <span v-if="p[1].split('_')[0] === 'resize'" class="p-param-wrap">
+                  width: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="1"
+                    :min="1"
+                    :max="800">
+                  
+                  heigth: ({{p[3]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
+                    :step="1"
+                    :min="1"
+                    :max="800">
+
+
+                  <select v-model="p[4]" class="p-param" @change="pg">
+                    <option>nearest</option>
+                    <option>bicubic</option>
+                  </select>
+
+                </span>
+
+
 
                 <span v-if="p[1].split('_')[0] === 'norm'" class="p-param-wrap">
                   <select v-model="p[2]" class="p-param" @change="pg">
@@ -593,6 +640,8 @@
           region: [10,10,100,100],
           pipeline: [
             [false, 'upsample', 3, 'nearest'],
+            [false, 'downsample', 3, 'nearest'],
+            [false, 'resize', 100, 100, 'nearest'],
             [false, 'norm', 'l2'],
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],
