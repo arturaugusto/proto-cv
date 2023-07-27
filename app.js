@@ -288,10 +288,22 @@ video.addEventListener("play", () => {
               new gm.Line(roiCanvasArr[i].roiCanvas.width, 0, roiCanvasArr[i].roiCanvas.width, roiCanvasArr[i].roiCanvas.height),
               context.line,
             );
+            const leftIntersection = gm.Line.Intersection(
+              new gm.Line(0, 0, 0, roiCanvasArr[i].roiCanvas.height),
+              context.line,
+            );
+            const topIntersection = gm.Line.Intersection(
+              new gm.Line(0, 0, roiCanvasArr[i].roiCanvas.width, 0),
+              context.line,
+            );
+
+
 
             let line = {
               bottomIntersection: bottomIntersection,
-              rightIntersection: rightIntersection
+              rightIntersection: rightIntersection,
+              leftIntersection: leftIntersection,
+              topIntersection: topIntersection
             }
 
             ;['angle', 'x1', 'x2', 'y1', 'y2', 'px', 'py'].forEach(item => {

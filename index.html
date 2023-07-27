@@ -253,8 +253,8 @@
                     class="p-param"
                     type="range"
                     :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
-                    :step="0.0001"
-                    :min="0.0001"
+                    :step="0.00001"
+                    :min="0.00001"
                     :max="1">
                 </span>
 
@@ -559,7 +559,8 @@
         },
         addConfRegion () {
           let conf = JSON.parse(JSON.stringify(this.confTemplate))
-          conf.region = [10, 10, roiCanvas.width/2-10, 100]
+          // conf.region = [10, 10, roiCanvas.width/2-10, 100]
+          conf.region = [10, 10, 64, 64]
           this.state.confs.push(conf)
           // console.log('lala')
         },
@@ -637,7 +638,7 @@
         this.colors = window.COLORS
         let confTemplate = {
           showpp: true,
-          region: [10,10,100,100],
+          region: [10,10,64,64],
           pipeline: [
             [false, 'upsample', 3, 'nearest'],
             [false, 'downsample', 3, 'nearest'],
@@ -645,12 +646,12 @@
             [false, 'norm', 'l2'],
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],
-            // [false, 'fft', 0.005],
             [false, 'colorSegmentation', 3],
             [false, 'upsample_2', 3, 'nearest'],
             [false, 'adaptiveThreshold', 60, 15],
             [false, 'sobelOperator'],
             [false, 'cannyEdges', 0.25, 0.85],
+            // [false, 'fft', 0.005],
             [false, 'invert'],
             [false, 'dilate', 3, 3],
             [false, 'erode', 3, 3],
@@ -707,7 +708,8 @@
 
         this.state.confs.forEach(conf => conf.trigRects ||= [])
 
-        this.state.confs[0].region ||= [10, 10, roiCanvas.width/2-10, 100]
+        // this.state.confs[0].region ||= [10, 10, roiCanvas.width/2-10, 100]
+        this.state.confs[0].region ||= [10, 10, 64, 64]
 
         this.PSM_OPTIONS = Object.keys(Tesseract.PSM)
 
