@@ -18,7 +18,10 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/codemirror.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/monokai.min.css" rel="stylesheet">
 
-  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script>
+  <!-- <script src='https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js'></script> -->
+  <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+  <!-- <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js'></script> -->
+  
 
 
 
@@ -379,9 +382,9 @@
                     <option>digits</option>
                     <option>7seg</option>
                     <option>digits+7seg</option>
-                    <option>lets</option>
-                    <option>lets+7seg</option>
-                    <option>letsgodigital</option>
+                    <!-- <option>lets</option> -->
+                    <!-- <option>lets+7seg</option> -->
+                    <!-- <option>letsgodigital</option> -->
                   </select>
                   PSM: <select v-model="p[3]" class="p-param" @change="pg($event, 'ocr')">
                     <option v-for="psm_option in PSM_OPTIONS" :key="psm_option">{{psm_option}}</option>
@@ -587,18 +590,18 @@
               let newWorker = null
               new Promise(resolve => {
                 if (window.location.host.indexOf('127.0.0.1') !== -1) {
-                  resolve(createWorker({langPath: 'http://127.0.0.1:8000', gzip: false}))
+                  resolve(createWorker(ocrParams[2], 1, {langPath: 'http://127.0.0.1:8000', gzip: false}))
                 } else {
-                  resolve(createWorker({langPath: 'https://arturaugusto.github.io/proto-cv', gzip: false}))
+                  resolve(createWorker(ocrParams[2], 1, {langPath: 'https://arturaugusto.github.io/proto-cv', gzip: false}))
                 }
               })
               .then(worker => {
                 newWorker = worker
-                return worker.loadLanguage(ocrParams[2])
+                return new Promise((resolve) => resolve(null))
               })
-              .then(_ => {
-                return newWorker.initialize(ocrParams[2])
-              })
+              // .then(_ => {
+              //   return newWorker.initialize(ocrParams[2])
+              // })
               .then(_ => {
                 let params = {
                   tessedit_pageseg_mode: Tesseract.PSM[ocrParams[3]]
@@ -631,7 +634,6 @@
               } else {
                 TESS_WORKERS[conf_i] = null
               }
-
             }
           })
           
