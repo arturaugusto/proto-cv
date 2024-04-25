@@ -81,7 +81,6 @@ video.addEventListener("play", () => {
       roiCanvasCtx.strokeStyle = COLORS[i]
       roiCanvasCtx.lineWidth = 2
       roiCanvasCtx.strokeRect(parseFloat(conf.region[0])-1, parseFloat(conf.region[1])-1, parseFloat(conf.region[2])+2, parseFloat(conf.region[3])+2)
-
       videoCanvasCtx.drawImage(video, 0, 0, videoCanvas.width, videoCanvas.height);
 
       roiCanvasArr[i].roiCanvasCtx.putImageData(imageData1, 0, 0);
@@ -420,15 +419,24 @@ video.addEventListener("play", () => {
     if (!OCR_WORKING) {
       OCR_WORKING = true
       Promise.all(state.confs.map((conf, conf_i) => {
-        let region = {
-          left: conf.region[0],
-          top: conf.region[1],
-          width: conf.region[2],
-          height: conf.region[3],
-        }
+        // let rectangle = {
+        //   left: 0,
+        //   top: 0,
+        //   width: Math.round(conf.region[2]),
+        //   height: conf.region[3],
+        // }
 
         if (TESS_WORKERS[conf_i]) {
-          return TESS_WORKERS[conf_i].recognize(roiCanvasArr[conf_i].roiCanvas, {region})
+          let ocrConf = conf.pipeline.filter(p => p[0] && p[1] === 'ocr')[0]
+          let extraConf = {}
+          
+          if (ocrConf && ocrConf[5]) {
+            try {extraConf = JSON.parse(ocrConf[5])}
+            catch (_) {console.warn('Unable to parse OCR conf JSON.')}
+          }
+          // ocrConf = Object.assign({}, {rectangle}, extraConf)
+          ocrConf = extraConf
+          return TESS_WORKERS[conf_i].recognize(roiCanvasArr[conf_i].roiCanvas, ocrConf)
         }
         return new Promise((resolve) => resolve(null))
       }))
@@ -453,6 +461,17 @@ video.addEventListener("play", () => {
       }, 25)
     }
     
+    // 
+    state.confs.forEach((conf, i) => {
+      roiCanvasCtx.strokeStyle = COLORS[i]
+      roiCanvasCtx.lineWidth = 2
+      roiCanvasCtx.strokeRect(
+        parseFloat(conf.region[0]) + parseFloat(conf.region[2]) - 5 - 2,
+        parseFloat(conf.region[1]) + parseFloat(conf.region[3]) - 5 - 2,
+        10 - 2,
+        10 - 2
+      )
+    })
 
   };
   requestAnimationFrame(draw);  

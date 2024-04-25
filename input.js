@@ -87,10 +87,10 @@ function makeElementDraggable(element) {
 
     handlerConfs = state.confs.filter(c => {
       return (
-        x >= (c.region[0] + c.region[2]) &&
-        y >= (c.region[1] + c.region[3]) &&
-        x <= (c.region[0] + c.region[2] + 5) &&
-        y <= (c.region[1] + c.region[3] + 5)
+        x >= (c.region[0] + c.region[2] - 8) &&
+        y >= (c.region[1] + c.region[3] - 8) &&
+        x <= (c.region[0] + c.region[2]) &&
+        y <= (c.region[1] + c.region[3])
       )
     })
 

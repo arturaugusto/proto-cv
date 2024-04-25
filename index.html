@@ -23,9 +23,6 @@
   <!-- <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.esm.min.js'></script> -->
   
 
-
-
-
 </head>
 
 <body>
@@ -395,6 +392,11 @@
                     type="text"
                     class="p-param"
                     v-model="p[4]">
+                  options (JSON): <input
+                    @change="pg($event, 'ocr')"
+                    type="text"
+                    class="p-param"
+                    v-model="p[5]">
                   <p v-if="ocrMessage" style="background: #f2f716;color: black;">{{ocrMessage}}</p>
                 </span>
 
@@ -467,8 +469,6 @@
             </span>
           </div>
 
-
-
         </div>
       </div>
     </div>
@@ -480,7 +480,6 @@
         <textarea style="width: 90vw;height: 40vh;margin-top: 6px;"></textarea>
       </div>
     </div>
-
 
 
     <div>    
@@ -503,9 +502,6 @@
     </div>
 
     
-
-
-
     
   </main>
   
