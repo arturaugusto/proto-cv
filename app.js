@@ -61,8 +61,6 @@ let gmContextCount = 0
 
 const context = { line: new gm.Line() }
 
-let POSTPROCESS_STATE = {}
-
 video.addEventListener("play", () => {
   videoCanvas.width = video.videoWidth;
   videoCanvas.height = video.videoHeight;
@@ -187,12 +185,20 @@ video.addEventListener("play", () => {
               let fftTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], arrayPreFft)
               pipeline = gm.add(fftTensor, pipeline)
 
+            } else if (opName === 'contrast') {
+              // let darkTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4])
+              // console.log(parseFloat(c[2]))
+              pipeline = gm.multScalar(pipeline, parseFloat(c[2]));
+              pipeline = gm.addScalar(pipeline, parseFloat(c[3]));
+
             } else if (opName === 'invert') {
               let whiteTensor = new gm.Tensor(pipeline.dtype, [...pipeline.shape])
               whiteTensor.data.fill(255)
               pipeline = gm.sub(whiteTensor, pipeline)
             } else if (opName === 'dilate' || opName === 'erode') {
               pipeline = gm[opName](pipeline, [...c.slice(2).map(parseFloat)])
+            } else if (opName === 'morphologyEx') {
+              pipeline = gm[opName](pipeline, c[4], [...c.slice(2, 4).map(parseFloat)])
             } else {
               if (opName === 'pcLines') {
                 // allocate output tensor

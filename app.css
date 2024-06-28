@@ -110,3 +110,92 @@ select {
   /*  border: 1px solid #eee;*/
   height: auto;
 }
+
+
+
+
+
+body {
+  background: #333;
+}
+
+.window {
+  position: fixed;
+  width: 400px;
+  height: 250px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: 1px 1px 4px rgba(0,0,0,0,0.9), -1px 1px 4px rgba(0,0,0,0,0.9);
+  background: #fff;
+}
+
+.window-content {
+  background: #000;
+  color: #fff;
+  height: 100%;
+  font-family: monospace;
+  padding: 5px;
+}
+
+.window-input {
+  display: block;
+  font-family: monospace;
+  width: calc(100% - 12px);
+  background-color: #000;
+  color: #fff;
+  border: 4px solid #fff;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 2px;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  outline: 0;
+}
+
+.window-top, .window-top-no-bind {
+  cursor: move;
+  text-align: right;
+  height: 20px;
+  border-bottom: 1px solid rgba(0,0,0,0.5);
+  border-top-right-radius: 5px;
+  border-top-left-radius: 5px;
+  padding: 5px;
+  background-color: #ddd;
+}
+
+.window-top-no-bind {
+  cursor: inherit;
+}
+
+.round {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  border: none;
+  margin-right: 6px;
+  box-shadow: 1px 1px 2px #000;
+}
+
+.green {
+  background-color: limegreen;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.red {
+  cursor: pointer;
+  background-color: red;
+}
+
+#myWindow {
+  z-index: 9999989;
+}
+
+#myWindow2 {
+  top: 0;
+  left: 500px;
+}

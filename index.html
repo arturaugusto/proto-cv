@@ -29,6 +29,7 @@
   <script type="text/javascript">
     document.body.classList.add('dark')
     var COLORS = ['#3D0843', '#590A26', '#335C0A', '#57630B', '#0C2842', '#66400C']
+    var POSTPROCESS_STATE = {}
   </script>
 
   <div class="top-right" id="mouseCoordDiv"></div>
@@ -51,6 +52,21 @@
 
 
       <div id="app">
+        
+        <!-- {{postprocessState}} -->
+        <!-- 
+        <div class="window" ref="window">
+          <div class="window-top-no-bind">
+          </div>
+          <div class="window-content">
+            
+            <div v-if="postprocessState && postprocessState.ui">
+              <div v-html="postprocessState.ui"></div>
+            </div>
+          </div>
+          <input class="window-input" type="text" />
+        </div> -->
+
         <!-- <pre>{{ state }}</pre> -->
 
 
@@ -125,7 +141,7 @@
                     v-model="p[0]"><strong> {{p[1]}}{{p[2] !== undefined ? ':' : ''}} </strong>
                 </div>
 
-                <span v-if="p[1].split('_')[0] === 'upsample'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'upsample'" class="p-param-wrap">
                   coefficient: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -142,7 +158,7 @@
 
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'downsample'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'downsample'" class="p-param-wrap">
                   coefficient: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -161,7 +177,7 @@
 
 
 
-                <span v-if="p[1].split('_')[0] === 'resize'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'resize'" class="p-param-wrap">
                   width: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -189,8 +205,38 @@
                 </span>
 
 
+                <span v-if="p[0] && p[1].split('_')[0] === 'morphologyEx'" class="p-param-wrap">
+                  width: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="1"
+                    :min="1"
+                    :max="40">
+                  
+                  heigth: ({{p[3]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
+                    :step="1"
+                    :min="1"
+                    :max="40">
 
-                <span v-if="p[1].split('_')[0] === 'norm'" class="p-param-wrap">
+
+                  <select v-model="p[4]" class="p-param" @change="pg">
+                    <option>open</option>
+                    <option>close</option>
+                    <option>gradient</option>
+                    <option>tophat</option>
+                    <option>blackhat</option>
+                  </select>
+
+                </span>
+
+
+                <span v-if="p[0] && p[1].split('_')[0] === 'norm'" class="p-param-wrap">
                   <select v-model="p[2]" class="p-param" @change="pg">
                     <option>l2</option>
                     <option>minmax</option>
@@ -198,7 +244,7 @@
                 </span>
 
 
-                <span v-if="p[1].split('_')[0] === 'gaussianBlur'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'gaussianBlur'" class="p-param-wrap">
                   H: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -217,7 +263,7 @@
                     :max="8">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'colorSegmentation'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'colorSegmentation'" class="p-param-wrap">
                   Clusters: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -228,7 +274,26 @@
                     :max="10">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'adaptiveThreshold'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'contrast'" class="p-param-wrap">
+                  Contrast: ({{p[2]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
+                    :step="0.1"
+                    :min="0"
+                    :max="20">
+                  Brightness: ({{p[3]}})<input
+                    @change="pg"
+                    class="p-param"
+                    type="range"
+                    :value="p[3]" @input="(x) => p[3] = parseFloat(x.target.value)"
+                    :step="0.01"
+                    :min="-1"
+                    :max="1">
+                </span>
+
+                <span v-if="p[0] && p[1].split('_')[0] === 'adaptiveThreshold'" class="p-param-wrap">
                   Size: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -236,7 +301,7 @@
                     :value="p[2]" @input="(x) => p[2] = parseFloat(x.target.value)"
                     :step="1"
                     :min="0"
-                    :max="100">
+                    :max="150">
                   Value: ({{p[3]}})<input
                     @change="pg"
                     class="p-param"
@@ -247,7 +312,7 @@
                     :max="100">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'fft'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'fft'" class="p-param-wrap">
                   scale: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -258,7 +323,7 @@
                     :max="1">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'threshold'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'threshold'" class="p-param-wrap">
                   thresh: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -269,7 +334,7 @@
                     :max="1">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'cannyEdges'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'cannyEdges'" class="p-param-wrap">
                   High Threshold: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -288,7 +353,7 @@
                     :max="1">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'dilate'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'dilate'" class="p-param-wrap">
                   W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -307,7 +372,7 @@
                     :max="40">
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'erode'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'erode'" class="p-param-wrap">
                   W: ({{p[2]}})<input
                     @change="pg"
                     class="p-param"
@@ -328,7 +393,7 @@
 
 
 
-                <span v-if="p[1].split('_')[0] === 'pcLines'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'pcLines'" class="p-param-wrap">
                   N lines: ({{p[5]}})<input
                     @change="pg"
                     class="p-param"
@@ -373,7 +438,7 @@
 
                 </span>
 
-                <span v-if="p[1].split('_')[0] === 'ocr'" class="p-param-wrap">
+                <span v-if="p[0] && p[1].split('_')[0] === 'ocr'" class="p-param-wrap">
                   lang: <select v-model="p[2]" class="p-param" @change="pg($event, 'ocr')">
                     <option>eng</option>
                     <option>digits</option>
@@ -520,6 +585,9 @@
       watch : {
         'state.code' (val) {
           this.pg()
+        },
+        'postprocessState.ui' (val) {
+          console.log(this.$refs)
         }
       },
       data() {
@@ -527,6 +595,7 @@
           stateChangeDebounce: undefined,
           ocrMessage: '',
           state: {},
+          postprocessState: undefined
         }
       },
       methods: {
@@ -637,6 +706,8 @@
         }
       },
       mounted () {
+        console.log(window.POSTPROCESS_STATE)
+        this.postprocessState = window.POSTPROCESS_STATE
         this.colors = window.COLORS
         let confTemplate = {
           showpp: true,
@@ -646,6 +717,8 @@
             [false, 'downsample', 3, 'nearest'],
             [false, 'resize', 100, 100, 'nearest'],
             [false, 'norm', 'l2'],
+            [false, 'contrast', 4, 0],
+            [false, 'morphologyEx', 4, 0, 'open'],
             [false, 'grayscale'],
             [false, 'gaussianBlur', 3, 3],
             [false, 'colorSegmentation', 3],
@@ -718,6 +791,9 @@
         this.setOcrWorkers()
 
         window.state = this.state
+
+
+        // makeDraggable(this.$refs.window)
       }
     }).mount('#app')
   </script>
