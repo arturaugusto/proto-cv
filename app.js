@@ -29,7 +29,7 @@ function stopMediaTracks(stream) {
 };
 
 
-function playTone(frequency, duration) {
+function playTone(frequency, duration, fadeOutDuration) {
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = audioContext.createOscillator();
   oscillator.frequency.value = frequency;
@@ -43,7 +43,7 @@ function playTone(frequency, duration) {
   oscillator.start();
 
   // Calculate the fade-out duration (20% of the total duration)
-  const fadeOutDuration = duration * 0.05;
+  fadeOutDuration = fadeOutDuration || (duration * 0.05);
 
   // Schedule the fade-out effect
   gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + (duration / 1000) - (fadeOutDuration / 1000));
@@ -514,7 +514,7 @@ select.addEventListener('change', event => {
     stopMediaTracks(currentStream);
   }
   const videoConstraints = {
-    frameRate: { ideal: 10, max: 15 }
+    // frameRate: { ideal: 10, max: 15 }
   };
   if (select.value === '') {
     videoConstraints.facingMode = 'environment';
