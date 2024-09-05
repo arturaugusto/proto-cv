@@ -69,6 +69,7 @@ video.addEventListener("play", () => {
   roiCanvas.height = video.videoHeight;
 
 
+  // let prevT = null
   const draw = () => {    
     roiCanvasCtx.clearRect(0, 0, roiCanvas.width, roiCanvas.height)
     
@@ -185,7 +186,13 @@ video.addEventListener("play", () => {
               let fftTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4], arrayPreFft)
               pipeline = gm.add(fftTensor, pipeline)
 
-            } else if (opName === 'contrast') {
+            }
+            // else if (opName === 'motionDetect') {
+            //   if (prevT) {
+            //     pipeline = gm.motionDetect(pipeline, prevT);
+            //   }
+            // }
+            else if (opName === 'contrast') {
               // let darkTensor = new gm.Tensor(pipeline.dtype, [roiCanvasArr[i].roiCanvas.height, roiCanvasArr[i].roiCanvas.width, 4])
               // console.log(parseFloat(c[2]))
               pipeline = gm.multScalar(pipeline, parseFloat(c[2]));
@@ -506,7 +513,9 @@ select.addEventListener('change', event => {
   if (typeof currentStream !== 'undefined') {
     stopMediaTracks(currentStream);
   }
-  const videoConstraints = {};
+  const videoConstraints = {
+    frameRate: { ideal: 10, max: 15 }
+  };
   if (select.value === '') {
     videoConstraints.facingMode = 'environment';
   } else {
@@ -519,6 +528,8 @@ select.addEventListener('change', event => {
   navigator.mediaDevices
   .getUserMedia(constraints)
   .then(stream => {
+    console.log(stream.getVideoTracks()[0].getSettings())
+
     currentStream = stream;
     video.srcObject = stream;
     return navigator.mediaDevices.enumerateDevices();
