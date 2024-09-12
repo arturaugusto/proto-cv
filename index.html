@@ -70,7 +70,7 @@
         <!-- <pre>{{ state }}</pre> -->
 
 
-        <div class="row is-marginless">
+        <div v-show="state.mode !== 'user'" class="row is-marginless">
           <div v-for="(conf, conf_i) in state.confs" class="col-2 is-marginless" style="padding-top: 6px;">
             
 
@@ -119,7 +119,7 @@
                   type="checkbox"
                   name=""
                   v-model="conf.showpp">
-                  <strong>Show result</strong>
+                  <strong>Enabled</strong>
               </div>
 
               <button class="button error" @click="state.confs.splice(conf_i,1)">remove</button>
@@ -533,18 +533,19 @@
               <button v-if="state && state.confs && state.confs.length < 6" class="button success" @click="addConfRegion">add pipeline</button>
             </span>
           </div>
-
         </div>
+        
+        <div v-show="state.mode !== 'user'" class="row is-marginless" style="padding-top: 20px;">
+          <div class="col-12">
+            <div>postprocessing code: <a id="loadSampleCode">(load sample code)</a></div>
+            <div id="code"></div>
+            <button class="button primary" @click="openUserMode">Open user mode</button>
+          </div>
+        </div>
+
       </div>
     </div>
 
-    <div class="row is-marginless" style="padding-top: 20px;">
-      <div class="col-12">
-        <div>postprocessing code: <a id="loadSampleCode">(load sample code)</a></div>
-        <div id="code"></div>
-        <textarea style="width: 90vw;height: 40vh;margin-top: 6px;"></textarea>
-      </div>
-    </div>
 
 
     <div>    
@@ -599,6 +600,41 @@
         }
       },
       methods: {
+        openUserMode () {
+          let mode = 'user'
+          let permalinkText = this.genPermalinkText(mode)
+          window.open(permalinkText,'_blank')
+        },
+        genPermalinkText (mode) {
+          let stateClone = JSON.parse(JSON.stringify(this.state))
+          stateClone.code = this.myCodeMirror.getValue()
+          
+          if (mode) stateClone.mode = mode
+          // clear state data
+          stateClone.confs.forEach(conf => {
+            delete conf.lines
+            delete conf.ocrData
+            delete conf.roiCanvasCtx
+            conf.pipeline = conf.pipeline.filter(p => p[0])
+            if (conf.trigRects) {
+              conf.trigRects.forEach(trigRect => {
+                delete trigRect.state
+              })
+            }
+          })
+
+          let permalinkText = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(JSONCrush.crush(JSON.stringify(stateClone)))
+          return permalinkText
+        },
+        updatePageTitle () {
+          // Set title based on first line of code
+          let firstLineOfCode = this.state.code.split('\n')[0]
+          if (firstLineOfCode.startsWith('//')) {
+            document.title = firstLineOfCode.replace('//','').trim()
+          } else {
+            document.title = "OkComputerVision"
+          }
+        },
         pg (evt, changeSource) {
           if (changeSource === 'ocr')  {
             // console.log(evt.target.parentElement)
@@ -607,27 +643,11 @@
           }
           window.clearTimeout(this.stateChangeDebounce)
           this.stateChangeDebounce = window.setTimeout(() => {
-            let stateClone = JSON.parse(JSON.stringify(this.state))
-            stateClone.code = this.myCodeMirror.getValue()
-            
-            // clear state data
-            stateClone.confs.forEach(conf => {
-              delete conf.lines
-              delete conf.ocrData
-              delete conf.roiCanvasCtx
-              conf.pipeline = conf.pipeline.filter(p => p[0])
-              if (conf.trigRects) {
-                conf.trigRects.forEach(trigRect => {
-                  delete trigRect.state
-                })
-              }
-            })
-
-
-            let permalinkText = window.location.origin + window.location.pathname + '#/' + encodeURIComponent(JSONCrush.crush(JSON.stringify(stateClone)))
+            let permalinkText = this.genPermalinkText()
             history.pushState(null, "", permalinkText)
             console.log('permalinkDone')
-          }, 500)
+            this.updatePageTitle()
+          }, 1500)
         },
         addConfRegion () {
           let conf = JSON.parse(JSON.stringify(this.confTemplate))
@@ -726,7 +746,7 @@
             [false, 'adaptiveThreshold', 60, 15],
             [false, 'sobelOperator'],
             [false, 'cannyEdges', 0.25, 0.85],
-            [false, 'motionDetect'],
+            // [false, 'motionDetect'],
             // [false, 'fft', 0.005],
             [false, 'invert'],
             [false, 'dilate', 3, 3],
@@ -752,6 +772,7 @@
         if (urlState) {
           try {
             Object.assign(this.state, JSON.parse(JSONCrush.uncrush(decodeURIComponent(urlState))))
+            console.log(this.state.mode)
             this.state.confs.forEach(loadedConf => {
               loadedConf.pipeline = confTemplate.pipeline.map(pItemTpl => {
                 // add if filter dony exists on loaded conf
@@ -777,8 +798,9 @@
           this.state.code = this.myCodeMirror.getValue()
         })
 
+        this.updatePageTitle()
 
-        this.myCodeMirror.setSize('90vw', '70vh')
+        this.myCodeMirror.setSize('90vw', '80vh')
         window.myCodeMirror = this.myCodeMirror
 
 
