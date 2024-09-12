@@ -29,7 +29,8 @@ function stopMediaTracks(stream) {
 };
 
 
-function playTone(frequency, duration, fadeOutDuration) {
+function playTone(frequency, duration, fadeOutDuration, start) {
+  start = start !== undefined ? start : true
   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
   const oscillator = audioContext.createOscillator();
   oscillator.frequency.value = frequency;
@@ -40,19 +41,21 @@ function playTone(frequency, duration, fadeOutDuration) {
   oscillator.connect(gainNode);
   gainNode.connect(audioContext.destination);
 
-  oscillator.start();
-
-  // Calculate the fade-out duration (20% of the total duration)
-  fadeOutDuration = fadeOutDuration || (duration * 0.05);
-
-  // Schedule the fade-out effect
-  gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + (duration / 1000) - (fadeOutDuration / 1000));
+  if (start) {
+    oscillator.start()
+    fadeOutDuration = fadeOutDuration || (duration * 0.05);
+    // Schedule the fade-out effect
+    gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + (duration / 1000) - (fadeOutDuration / 1000));
+  }
 
   // Stop the oscillator after the specified duration
-  setTimeout(function() {
-    oscillator.stop();
-    audioContext.close();
-  }, duration);
+  if (duration !== 0 && start) {
+    setTimeout(function() {
+      oscillator.stop();
+      audioContext.close();
+    }, duration)
+  }
+  return oscillator
 }
 
 
