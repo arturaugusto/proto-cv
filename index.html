@@ -51,7 +51,7 @@
 
 
 
-      <div id="app">
+      <div id="app" style="visibility: collapse;">
         
         <!-- {{postprocessState}} -->
         <!-- 
@@ -119,7 +119,7 @@
                   type="checkbox"
                   name=""
                   v-model="conf.showpp">
-                  <strong>Enabled</strong>
+                  <strong>Show result</strong>
               </div>
 
               <button class="button error" @click="state.confs.splice(conf_i,1)">remove</button>
@@ -554,7 +554,7 @@
         <canvas id="videoCanvas"></canvas>
         <canvas id="roiCanvas"></canvas>
       </div>
-      <canvas id="roi1Canvas" style="visibility: collapse;"></canvas>
+      <canvas id="roi1Canvas" style="visibility: collapse"></canvas>
 
       <canvas id="roi2Canvas" style="visibility: collapse;"></canvas>
 
@@ -815,7 +815,8 @@
 
         window.state = this.state
 
-
+        // make app visible when mounted
+        this.$el.parentElement.style.visibility = 'unset'
         // makeDraggable(this.$refs.window)
       }
     }).mount('#app')
