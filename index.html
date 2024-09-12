@@ -628,11 +628,13 @@
         },
         updatePageTitle () {
           // Set title based on first line of code
-          let firstLineOfCode = this.state.code.split('\n')[0]
-          if (firstLineOfCode.startsWith('//')) {
-            document.title = firstLineOfCode.replace('//','').trim()
-          } else {
-            document.title = "OkComputerVision"
+          if (this.state && this.state.code) {
+            let firstLineOfCode = this.state.code.split('\n')[0]
+            if (firstLineOfCode.startsWith('//')) {
+              document.title = firstLineOfCode.replace('//','').trim()
+            } else {
+              document.title = "OkComputerVision"
+            }
           }
         },
         pg (evt, changeSource) {

@@ -414,7 +414,7 @@ video.addEventListener("play", () => {
       })
 
       if (conf.showpp) {
-        // roiCanvasCtx.drawImage(roiCanvasArr[i].roiCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
+        roiCanvasCtx.drawImage(roiCanvasArr[i].roiCanvas, conf.region[0], conf.region[1], conf.region[2], conf.region[3])
       }
       
     })
