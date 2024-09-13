@@ -537,7 +537,10 @@
         
         <div v-show="state.mode !== 'user'" class="row is-marginless" style="padding-top: 20px;">
           <div class="col-12">
-            <div>postprocessing code: <a id="loadSampleCode">(load sample code)</a></div>
+            <div>
+              postprocessing code: <a id="loadSampleCode">(load sample code)</a>
+              | <label>disable permalink generator<input class="p-param" type="checkbox" v-model="disablePermalink"></label>
+            </div>
             <div id="code"></div>
             <button class="button primary" @click="openUserMode">Open user mode</button>
           </div>
@@ -596,7 +599,8 @@
           stateChangeDebounce: undefined,
           ocrMessage: '',
           state: {},
-          postprocessState: undefined
+          postprocessState: undefined,
+          disablePermalink: false,
         }
       },
       methods: {
@@ -643,13 +647,17 @@
             console.log('reload to apply changes')
             this.ocrMessage = 'Reload page to apply changes'
           }
-          window.clearTimeout(this.stateChangeDebounce)
-          this.stateChangeDebounce = window.setTimeout(() => {
-            let permalinkText = this.genPermalinkText()
-            history.pushState(null, "", permalinkText)
-            console.log('permalinkDone')
-            this.updatePageTitle()
-          }, 1500)
+          if (!this.disablePermalink) {
+
+            window.clearTimeout(this.stateChangeDebounce)
+            this.stateChangeDebounce = window.setTimeout(() => {
+              let permalinkText = this.genPermalinkText()
+              history.pushState(null, "", permalinkText)
+              console.log('permalinkDone')
+              this.updatePageTitle()
+            }, 1500)
+
+          }
         },
         addConfRegion () {
           let conf = JSON.parse(JSON.stringify(this.confTemplate))
